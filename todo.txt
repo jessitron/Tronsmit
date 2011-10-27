@@ -1,6 +1,6 @@
 Stories:
 
-1) There is an app.
+X) There is an app.
 
 2) Display the last picture taken.
 
@@ -9,11 +9,16 @@ Stories:
 4) Send the picture by text (hardcoded number)
 
 5) Set the number.
-  a) Have a menu option for setting the number.
-  b) Store the new number.
+   - create a preferences activity to fetch it.
 
 7) On opening, if no number is set, ask for one.
 
 8) Option to delete the picture after sending.
 
 9) Nice happy icon
+
+10) Select a contact to set the number.
+
+
+Silly stuff that would be fun:
+- default the phone number to the one most frequently texted (or texted pictures)
