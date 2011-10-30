@@ -9,6 +9,7 @@ X) There is an app.
 4) Send the picture by text (hardcoded number)
 
 5) Set the number.
+   - menu item for settings
    - create a preferences activity to fetch it.
 
 7) On opening, if no number is set, ask for one.

@@ -3,6 +3,8 @@
       package="com.jessitron.boyfriend"
       android:versionCode="1"
       android:versionName="1.0">
+ <uses-permission android:name="android.permission.READ_CONTACTS" />
+      
     <application android:label="@string/app_name" android:icon="@drawable/icon">
         <activity android:name="BoyfriendActivity"
                   android:label="@string/app_name">
