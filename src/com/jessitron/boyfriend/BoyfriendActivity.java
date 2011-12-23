@@ -14,7 +14,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Date;
+
 import static android.provider.MediaStore.Images.ImageColumns.DATE_TAKEN;
+import static android.provider.MediaStore.MediaColumns.DATE_ADDED;
 
 public class BoyfriendActivity extends Activity {
     private static final int PICK_CONTACT_REQUEST_CODE = 1;
@@ -76,6 +79,17 @@ public class BoyfriendActivity extends Activity {
         // startActivity(shareIntent);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        doSomethingWithPictures();
+    }
+
+    private String formatDate(int secondsSince1970)
+    {
+        return "" + new Date(secondsSince1970 * 1000);
+    }
+
     private void doSomethingWithPictures() {
         //final ContentProviderClient contentProviderClient = getContentResolver().acquireContentProviderClient(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
@@ -83,24 +97,29 @@ public class BoyfriendActivity extends Activity {
                 MediaStore.Images.ImageColumns.DATA,
                 MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
                 DATE_TAKEN,
-                MediaStore.Images.ImageColumns.MIME_TYPE
+                MediaStore.Images.ImageColumns.MIME_TYPE              ,
+                DATE_ADDED
         };
-        final Cursor cursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, DATE_TAKEN + " DESC");
+        final Cursor cursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, DATE_ADDED + " DESC");
 
+        //TODO: ask whether this is the same picture as before, and then don't redraw
         if (cursor.moveToFirst()) {
             final String bucket = cursor.getString(2);
             say("The bucket of the first one is " + bucket);
+            say("The date taken is: " + formatDate(cursor.getInt(3)));
+            say("The date added is: " + formatDate(cursor.getInt(5)));
             final ImageView imageView = (ImageView) findViewById(R.id.pictureView);
             imageLocation = "file://" + cursor.getString(1);
             say("Image located at: " + imageLocation);
             putPicInView(imageView);
-
+            imageView.invalidate();
             imageType = cursor.getString(4);
             say("The type of this image is " + imageType);
         } else {
             // freak out!
             say("No pictures found at all");
         }
+        cursor.close();
     }
 
     private void putPicInView(ImageView imageView) {
