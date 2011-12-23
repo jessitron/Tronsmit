@@ -1,3 +1,8 @@
 *.swp
 bin/*
 *~
+.idea
+*.iml
+*.ipr
+*.iws
+out

@@ -2,7 +2,9 @@ Stories:
 
 X) There is an app.
 
-2) Display the last picture taken.
+1) Move the setting the number bit to a preferences screen
+
+X) Display the last picture taken.
 
 3) Send a text (hardcoded content and number).
 
@@ -20,6 +22,7 @@ X) There is an app.
 
 10) Select a contact to set the number.
 
+) Make the transmit button disabled if no phone number is set
 
 Silly stuff that would be fun:
 - default the phone number to the one most frequently texted (or texted pictures)

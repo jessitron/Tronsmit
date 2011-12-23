@@ -18,5 +18,19 @@
 	android:layout_width="fill_parent"
         android:layout_height="wrap_content"
 	android:text="Pick Contact"/>
+    <Button
+            android:id="@+id/transmitXX"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Transmit"/>
+
+    <ImageView
+        android:id="@+id/pictureView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#FF9900"
+         />
+
+
 </LinearLayout>
 
