@@ -1,31 +1,24 @@
 package com.jessitron.boyfriend;
 
+import java.util.Date;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.Date;
-
-import static android.provider.MediaStore.Images.ImageColumns.DATE_TAKEN;
-import static android.provider.MediaStore.MediaColumns.DATE_ADDED;
-
 public class BoyfriendActivity extends Activity {
     private static final int PICK_CONTACT_REQUEST_CODE = 1;
     private static final String LOG_PREFIX = "BoyfriendActivity";
 
     private String phoneNumber;
-    private String imageLocation;
-    private String imageType;
+    
+    private PictureManager pictureManager;
 
     /**
      * Called when the activity is first created.
@@ -38,36 +31,42 @@ public class BoyfriendActivity extends Activity {
         loadPreferences();
         Button pickContact = (Button) findViewById(R.id.pickContact);
         pickContact.setOnClickListener(getPickContactListener());
+        
+        pictureManager = new PictureManager((ImageView) findViewById(R.id.pictureView), this); 
+        pictureManager.reset();
 
-        doSomethingWithPictures();
         if (getPhoneNumber() != null) {
             activateTransmitButton();
         } else {
+            deactivateTransmitButton();
             say("transmit not activated because phone number unknown");
         }
     }
 
+    private void deactivateTransmitButton() {
+        final Button transmitButton = (Button) findViewById(R.id.transmitXX);
+        transmitButton.setEnabled(false);
+    }
+
     private void activateTransmitButton() {
         final Button transmitButton = (Button) findViewById(R.id.transmitXX);
+        transmitButton.setEnabled(true);
         transmitButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                say("About to send a text message to " + getPhoneNumber());
-//                SmsManager.getDefault().sendTextMessage(getPhoneNumber(), null, "Testing 1 2 3. tell me if you get this", null, null);
-//                say("Well, I think I sent a text message to " + getPhoneNumber());
-                attemptToSendPicture();
+               attemptToSendPicture();
             }
         });
     }
 
     private void attemptToSendPicture() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+     //   shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
     //    shareIntent.putExtra(Intent.EXTRA_SUBJECT, "what does this do?");
      //   shareIntent.putExtra(Intent.EXTRA_TEXT, "If this works, ya gotta tell me about it");
-        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(imageLocation));
+        shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
         shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, phoneNumber);
       //  shareIntent.putExtra(Intent.EXTRA_EMAIL, phoneNumber);
-        shareIntent.setType(imageType);
+        shareIntent.setType(pictureManager.getImageType());
 
 
         final ResolveInfo resolveInfo = getPackageManager().resolveActivity(shareIntent, 0);
@@ -76,13 +75,13 @@ public class BoyfriendActivity extends Activity {
         say(" wish this were a string "); resolveInfo.activityInfo.describeContents();
 
         say("it is named " + resolveInfo.activityInfo.name);
-        // startActivity(shareIntent);
+         startActivity(shareIntent);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        doSomethingWithPictures();
+        pictureManager.reset();
     }
 
     private String formatDate(int secondsSince1970)
@@ -90,46 +89,7 @@ public class BoyfriendActivity extends Activity {
         return "" + new Date(secondsSince1970 * 1000);
     }
 
-    private void doSomethingWithPictures() {
-        //final ContentProviderClient contentProviderClient = getContentResolver().acquireContentProviderClient(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-        String[] projection = new String[]{MediaStore.Images.ImageColumns._ID,
-                MediaStore.Images.ImageColumns.DATA,
-                MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
-                DATE_TAKEN,
-                MediaStore.Images.ImageColumns.MIME_TYPE              ,
-                DATE_ADDED
-        };
-        final Cursor cursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, DATE_ADDED + " DESC");
-
-        //TODO: ask whether this is the same picture as before, and then don't redraw
-        if (cursor.moveToFirst()) {
-            final String bucket = cursor.getString(2);
-            say("The bucket of the first one is " + bucket);
-            say("The date taken is: " + formatDate(cursor.getInt(3)));
-            say("The date added is: " + formatDate(cursor.getInt(5)));
-            final ImageView imageView = (ImageView) findViewById(R.id.pictureView);
-            imageLocation = "file://" + cursor.getString(1);
-            say("Image located at: " + imageLocation);
-            putPicInView(imageView);
-            imageView.invalidate();
-            imageType = cursor.getString(4);
-            say("The type of this image is " + imageType);
-        } else {
-            // freak out!
-            say("No pictures found at all");
-        }
-        cursor.close();
-    }
-
-    private void putPicInView(ImageView imageView) {
-         imageView.setImageURI(Uri.parse(imageLocation));
-//        File imageFile = new File(imageLocation);
-//        if (imageFile.exists()) {   // TODO: is there a better way to do this?
-//            Bitmap bm = BitmapFactory.decodeFile(imageLocation);
-//            imageView.setImageBitmap(bm);
-//        }
-    }
 
     @Override
     protected void onPause() {
