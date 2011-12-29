@@ -1,9 +1,10 @@
 package com.jessitron.boyfriend;
 
-import java.util.Date;
+import com.jessitron.boyfriend.database.Transmissions;
+import com.jessitron.boyfriend.database.TransmitOpenHelper;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
@@ -12,9 +13,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class BoyfriendActivity extends Activity {
+public class TransmitActivity extends Activity {
     private static final int PICK_CONTACT_REQUEST_CODE = 1;
-    private static final String LOG_PREFIX = "BoyfriendActivity";
+    private static final String LOG_PREFIX = "TransmitActivity";
 
     private String phoneNumber;
     
@@ -53,29 +54,24 @@ public class BoyfriendActivity extends Activity {
         transmitButton.setEnabled(true);
         transmitButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-               attemptToSendPicture();
+                sendPicture();
             }
         });
     }
 
-    private void attemptToSendPicture() {
+    private void sendPicture() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-     //   shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    //    shareIntent.putExtra(Intent.EXTRA_SUBJECT, "what does this do?");
-     //   shareIntent.putExtra(Intent.EXTRA_TEXT, "If this works, ya gotta tell me about it");
         shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
         shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, phoneNumber);
-      //  shareIntent.putExtra(Intent.EXTRA_EMAIL, phoneNumber);
         shareIntent.setType(pictureManager.getImageType());
 
+        startActivity(shareIntent);
+        recordTransmission();
+    }
 
-        final ResolveInfo resolveInfo = getPackageManager().resolveActivity(shareIntent, 0);
-        say("resolveInfo " + resolveInfo);
-        say("activity info: " + resolveInfo.activityInfo);
-        say(" wish this were a string "); resolveInfo.activityInfo.describeContents();
-
-        say("it is named " + resolveInfo.activityInfo.name);
-         startActivity(shareIntent);
+    private void recordTransmission() {
+        final SQLiteDatabase db = new TransmitOpenHelper(this).getWritableDatabase();
+        new Transmissions().saveTransmission(db, pictureManager.getImageLocation(), getPhoneNumber());
     }
 
     @Override
@@ -83,12 +79,6 @@ public class BoyfriendActivity extends Activity {
         super.onResume();
         pictureManager.reset();
     }
-
-    private String formatDate(int secondsSince1970)
-    {
-        return "" + new Date(secondsSince1970 * 1000);
-    }
-
 
 
     @Override
@@ -99,7 +89,7 @@ public class BoyfriendActivity extends Activity {
 
     private void savePreferences() {
         getPreferences(MODE_PRIVATE).edit().putString("phoneNumber", phoneNumber).commit();
-        // apply would be better (doesn't block for disk i/o) but that's API-9
+        // apply would be better than commit (doesn't block for disk i/o) but that's API-9
     }
 
     private void loadPreferences() {
