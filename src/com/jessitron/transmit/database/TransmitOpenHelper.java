@@ -1,4 +1,4 @@
-package com.jessitron.boyfriend.database;
+package com.jessitron.transmit.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

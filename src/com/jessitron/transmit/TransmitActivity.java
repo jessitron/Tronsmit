@@ -1,13 +1,15 @@
-package com.jessitron.boyfriend;
+package com.jessitron.transmit;
 
-import com.jessitron.boyfriend.database.Transmissions;
-import com.jessitron.boyfriend.database.TransmitOpenHelper;
+import com.jessitron.transmit.database.Transmissions;
+import com.jessitron.transmit.database.TransmitOpenHelper;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -42,6 +44,26 @@ public class TransmitActivity extends Activity {
             deactivateTransmitButton();
             say("transmit not activated because phone number unknown");
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.history:
+               openHistory();
+               return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void openHistory() {
+        startActivity(new Intent(this, TransmissionHistoryActivity.class));
     }
 
     private void deactivateTransmitButton() {

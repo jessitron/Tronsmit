@@ -1,4 +1,4 @@
-package com.jessitron.boyfriend;
+package com.jessitron.transmit;
 
 import android.app.Activity;
 import android.database.Cursor;
