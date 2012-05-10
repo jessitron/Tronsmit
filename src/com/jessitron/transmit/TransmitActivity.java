@@ -76,7 +76,7 @@ public class TransmitActivity extends Activity {
         transmitButton.setEnabled(true);
         transmitButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                sendPicture();
+                sendPictureHtc();
             }
         });
     }
@@ -85,6 +85,17 @@ public class TransmitActivity extends Activity {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
         shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, phoneNumber);
+        shareIntent.setType(pictureManager.getImageType());
+
+        startActivity(shareIntent);
+        recordTransmission();
+    }
+
+    private void sendPictureHtc() {
+        Intent shareIntent = new Intent("android.intent.action.SEND_MSG");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
+        shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, phoneNumber);
+        shareIntent.putExtra("address", phoneNumber);
         shareIntent.setType(pictureManager.getImageType());
 
         startActivity(shareIntent);
