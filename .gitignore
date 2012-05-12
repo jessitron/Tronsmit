@@ -1,4 +1,5 @@
 *.swp
+Thumbs.db
 bin/*
 *~
 .idea
