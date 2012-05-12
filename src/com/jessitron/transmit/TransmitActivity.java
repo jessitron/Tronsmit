@@ -1,10 +1,7 @@
 package com.jessitron.transmit;
 
-import com.jessitron.transmit.database.Transmissions;
-import com.jessitron.transmit.database.TransmitOpenHelper;
 import android.app.Activity;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
@@ -56,14 +53,10 @@ public class TransmitActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.history:
-               openHistory();
+               // TODO: make add button option instead
                return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void openHistory() {
-        startActivity(new Intent(this, TransmissionHistoryActivity.class));
     }
 
     private void deactivateTransmitButton() {
@@ -88,7 +81,6 @@ public class TransmitActivity extends Activity {
         shareIntent.setType(pictureManager.getImageType());
 
         startActivity(shareIntent);
-        recordTransmission();
     }
 
     private void sendPictureHtc() {
@@ -99,12 +91,6 @@ public class TransmitActivity extends Activity {
         shareIntent.setType(pictureManager.getImageType());
 
         startActivity(shareIntent);
-        recordTransmission();
-    }
-
-    private void recordTransmission() {
-        final SQLiteDatabase db = new TransmitOpenHelper(this).getWritableDatabase();
-        new Transmissions().saveTransmission(db, pictureManager.getImageLocation(), getPhoneNumber());
     }
 
     @Override
@@ -154,7 +140,6 @@ public class TransmitActivity extends Activity {
         if (requestCode == PICK_CONTACT_REQUEST_CODE && resultCode == RESULT_OK) {
             gotAContact(data.getData());
         }
-
     }
 
     private void gotAContact(android.net.Uri uri) {
