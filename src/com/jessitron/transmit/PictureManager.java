@@ -1,14 +1,14 @@
 package com.jessitron.transmit;
 
+import static android.provider.MediaStore.Images.ImageColumns.DATE_TAKEN;
+import static android.provider.MediaStore.MediaColumns.DATE_ADDED;
+
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.ImageView;
-
-import static android.provider.MediaStore.Images.ImageColumns.DATE_TAKEN;
-import static android.provider.MediaStore.MediaColumns.DATE_ADDED;
 
 public class PictureManager {
 
@@ -39,13 +39,17 @@ public class PictureManager {
     private void updateImageToCurrentPicture() {
        if (cursor.isAfterLast()) {
            Log.d(LOG_PREFIX, "No pictures found");
-           // todo: put something blank in the view?
+           clearView();
            return;
        }
         putPicInView(imageView);
         imageView.invalidate();
     }
-    
+
+    private void clearView() {
+        imageView.setImageDrawable(null);
+    }
+
     public String getImageType() {
         String imageType = cursor.getString(4);
         Log.d(LOG_PREFIX, "The type of this image is " + imageType);
@@ -61,10 +65,18 @@ public class PictureManager {
         imageView.setImageURI(getImageLocation());
     }
 
+    public void advance() {
+        cursor.moveToNext();
+        updateImageToCurrentPicture();
+        putPicInView(imageView);
+    }
+
     private void queryPictures() {
         closeCursor();
         // TODO: is a managed query correct? we don't want to close it when we lose focus.
         cursor = context.managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, SELECTED_COLUMNS, null, null, DATE_ADDED + " DESC");
+        // TODO: this cursor is occasionally null ?!?
+        // like if the disk is not available -- check whether the disk is available.
         cursor.moveToFirst();
     }
 

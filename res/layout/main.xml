@@ -17,19 +17,28 @@
 	android:id="@+id/pickContact"
 	android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:onClick="pickContact"
 	android:text="Pick Contact"/>
     <Button
-            android:id="@+id/transmitXX"
+            android:id="@+id/transmit"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:onClick="sendPictureHtc"
             android:text="Transmit"/>
 
+    <Button
+            android:id="@+id/otherTransmission"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="sendPicture"
+            android:text="Send Elsewhere"/>
     <ImageView
         android:id="@+id/pictureView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#FF9900"
-         />
+        android:onClick="pictureTouched"
+        android:contentDescription="recent photo"/>
 
 
 </LinearLayout>
