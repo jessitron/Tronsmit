@@ -15,5 +15,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".HtcMmsForwarder" android:label="@string/forwardmms">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <data android:mimeType="image/*"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

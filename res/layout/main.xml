@@ -3,11 +3,12 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:id="@+id/buttonContainer"
     >
 <TextView
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:text="Phone number: "
+        android:text="Phone number: "
     />
     <TextView
         android:id="@+id/phoneNumber"
@@ -25,6 +26,11 @@
             android:layout_height="wrap_content"
             android:onClick="sendPictureHtc"
             android:text="Transmit"/>
+    <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="chooseAction"
+            android:text="Choose an action"/>
 
     <Button
             android:id="@+id/otherTransmission"

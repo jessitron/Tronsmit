@@ -36,14 +36,18 @@ public class PictureManager {
         
     }
 
+    public boolean hasPicture() {
+        return cursor != null && !cursor.isAfterLast();
+    }
+
     private void updateImageToCurrentPicture() {
        if (cursor.isAfterLast()) {
            Log.d(LOG_PREFIX, "No pictures found");
            clearView();
-           return;
-       }
+       } else {
         putPicInView(imageView);
         imageView.invalidate();
+       }
     }
 
     private void clearView() {
