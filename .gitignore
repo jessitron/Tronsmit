@@ -1,6 +1,7 @@
 *.swp
 Thumbs.db
 bin/*
+gen/*
 *~
 .idea
 *.iml
