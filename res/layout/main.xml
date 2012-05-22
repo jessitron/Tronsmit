@@ -3,29 +3,37 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/buttonContainer"
     >
-<TextView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-        android:text="Phone number: "
-    />
-    <TextView
-        android:id="@+id/phoneNumber"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
-<Button
-	android:id="@+id/pickContact"
-	android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:onClick="pickContact"
-	android:text="Pick Contact"/>
+
     <Button
-            android:id="@+id/transmit"
+            android:id="@+id/pickContact"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:onClick="sendPictureHtc"
-            android:text="Transmit"/>
+            android:onClick="pickContact"
+            android:text="Pick Contact"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="horizontal"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/buttonContainer"
+            >
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+        android:text="Transmit to: "
+    />
+    <TextView
+        android:id="@+id/contactName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+            android:text="Nobody"/></LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="vertical"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/buttonContainer"
+            >
+
     <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -38,6 +46,7 @@
             android:layout_height="wrap_content"
             android:onClick="sendPicture"
             android:text="Send Elsewhere"/>
+        </LinearLayout>
     <ImageView
         android:id="@+id/pictureView"
         android:layout_width="fill_parent"

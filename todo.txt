@@ -20,6 +20,8 @@ X) Explore queryActivities. what is available for sending?
 
 8) Explore flag to not remain in front.
 
+) can the HTC MMS activity can be added programmatically?
+
 bug: make it skip past 3D photos
 
 ) in my chooser I might hit something that is not a default.
