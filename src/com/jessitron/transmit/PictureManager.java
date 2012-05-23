@@ -3,7 +3,7 @@ package com.jessitron.transmit;
 import static android.provider.MediaStore.Images.ImageColumns.DATE_TAKEN;
 import static android.provider.MediaStore.MediaColumns.DATE_ADDED;
 
-import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -21,11 +21,11 @@ public class PictureManager {
             DATE_ADDED                                                        // 5
     };
     private Cursor cursor;
-    private final ImageView imageView;
-    private final Activity context;
+    private ImageView imageView;
+    private final Context context;
 
 
-    public PictureManager(ImageView imageView, Activity context) {
+    public PictureManager(ImageView imageView, Context context) {
         this.imageView = imageView;
         this.context = context;
     }
@@ -78,7 +78,7 @@ public class PictureManager {
     private void queryPictures() {
         closeCursor();
         // TODO: is a managed query correct? we don't want to close it when we lose focus.
-        cursor = context.managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, SELECTED_COLUMNS, null, null, DATE_ADDED + " DESC");
+        cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, SELECTED_COLUMNS, null, null, DATE_ADDED + " DESC");
         // TODO: this cursor is occasionally null ?!?
         // like if the disk is not available -- check whether the disk is available.
         cursor.moveToFirst();
@@ -88,6 +88,11 @@ public class PictureManager {
         if (cursor != null && !cursor.isClosed()) {
             cursor.close();
         }
+    }
+
+    public void shutDown() {
+        closeCursor();
+        imageView = null;
     }
 
 }

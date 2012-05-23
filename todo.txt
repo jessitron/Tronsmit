@@ -28,3 +28,7 @@ bug: make it skip past 3D photos
 
 Silly stuff that would be fun:
 - default the phone number to the one most frequently texted (or texted pictures)
+
+Presentation:
+- add a screenshot of choosing an activity, other interesting thing
+- add slides for alternate activity launch modes / intent flags.

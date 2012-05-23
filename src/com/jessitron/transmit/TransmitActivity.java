@@ -9,14 +9,17 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,10 +29,10 @@ import android.widget.Toast;
 public class TransmitActivity extends Activity {
     private static final int PICK_CONTACT_REQUEST_CODE = 1;
     private static final int CHOOSE_INTENT_CODE = 2;
+    private static final int TAKE_PICTURE_CODE = 3;
     private static final String LOG_PREFIX = "TransmitActivity";
 
     private PictureManager pictureManager;
-    private boolean htcDevice;
 
     private String phoneNumber;
     private String email;
@@ -42,13 +45,14 @@ public class TransmitActivity extends Activity {
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        say("onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
         loadPreferences();
         examineDevice();
 
-        pictureManager = new PictureManager((ImageView) findViewById(R.id.pictureView), this);
+        pictureManager = new PictureManager((ImageView) findViewById(R.id.pictureView), getApplicationContext());
         pictureManager.reset();
         if (!pictureManager.hasPicture()) {
             disableAllButtons();
@@ -58,9 +62,9 @@ public class TransmitActivity extends Activity {
 
     private void examineDevice() {
         Intent htcSpecialSend = new Intent("android.intent.action.SEND_MSG");
-        htcSpecialSend.setType("image/jpg");
+        htcSpecialSend.setType("image/jpeg");
         final List<ResolveInfo> htcSendResolution = getPackageManager().queryIntentActivities(htcSpecialSend, PackageManager.GET_INTENT_FILTERS | PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER);
-        htcDevice = (htcSendResolution != null && !htcSendResolution.isEmpty());
+        boolean htcDevice = (htcSendResolution != null && !htcSendResolution.isEmpty());
         say("HTC device? " + htcDevice);
     }
 
@@ -77,13 +81,13 @@ public class TransmitActivity extends Activity {
 
         // HTC
         shareIntent.putExtra("address", phoneNumber);
-        shareIntent.putExtra("sms_body", "sent by Transmitron");
+        shareIntent.putExtra("sms_body", R.string.attribution);
 
         // Email
         if (email != null) {
             shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
         }
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "sent by Transmitron");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "sent by Tronsmit");
 
         return shareIntent;
     }
@@ -100,12 +104,6 @@ public class TransmitActivity extends Activity {
         startActivity(shareIntent);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        say("onResume called");
-        pictureManager.reset();
-    }
 
     private void savePreferences(Uri contactUri) {
         getPreferences(MODE_PRIVATE).edit().putString("contactUri", contactUri.toString()).apply();
@@ -152,6 +150,8 @@ public class TransmitActivity extends Activity {
         } else if (requestCode == CHOOSE_INTENT_CODE && resultCode == RESULT_OK) {
             gotAnAction(data);
             addAbutton();
+        } else if (requestCode == TAKE_PICTURE_CODE && resultCode == RESULT_OK) {
+            pictureManager.reset(); // find the new picture
         }
     }
 
@@ -262,11 +262,38 @@ public class TransmitActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.history:
+            case R.id.printstuff:
                 printStuff();
+                return true;
+            case R.id.dial:
+                dial();
+                return true;
+            case R.id.camera:
+                takePicture();
+                return true;
+            case R.id.flashy:
+                flashSomeLights();
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void takePicture() {
+       Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(pictureIntent, TAKE_PICTURE_CODE);
+    }
+
+    private void flashSomeLights() {
+        Intent intent = new Intent("com.teslacoilsw.intent.FLASHLIGHT");
+        intent.putExtra("strobe", 10);
+        intent.putExtra("timeout", 5);
+        startService(intent);
+    }
+
+    private void dial() {
+        Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber) );
+        dialIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(dialIntent);
     }
 
     private void disableAllButtons() {
@@ -347,5 +374,81 @@ public class TransmitActivity extends Activity {
                 }
             }
         }
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        say("onResume called");
+        pictureManager.reset();
+    }
+
+    @Override
+    protected void onStop() {
+        say("onStop");
+        super.onStop();    
+    }
+
+    @Override
+    protected void onDestroy() {
+        pictureManager.shutDown();
+        say("onDestroy");
+        super.onDestroy();
+        unbindDrawables(findViewById(R.id.rootContainer));
+    }
+
+    private void unbindDrawables(View view) {
+        if (view.getBackground() != null) {
+            view.getBackground().setCallback(null);
+        }
+        if (view instanceof ViewGroup) {
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+                unbindDrawables(((ViewGroup) view).getChildAt(i));
+            }
+            ((ViewGroup) view).removeAllViews();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        say("onPause");
+        super.onPause();    
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        say("onUserLeaveHint");
+        super.onUserLeaveHint();    
+    }
+
+    @Override
+    protected void onPostResume() {
+        say("onPostResume");
+        super.onPostResume();    
+    }
+
+    @Override
+    protected void onRestart() {
+        say("onRestart");
+        super.onRestart();    
+    }
+
+    @Override
+    protected void onStart() {
+        say("onStart");
+        super.onStart();    
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        say("onConfigChanged");
+        super.onConfigurationChanged(newConfig);    
+    }
+
+    @Override
+    public void onBackPressed() {
+        say("onBackPressed");
+        super.onBackPressed();    
     }
 }

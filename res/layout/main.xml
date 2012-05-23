@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:id="@+id/rootContainer"
+        >
 
     <Button
             android:id="@+id/pickContact"
@@ -15,45 +16,48 @@
                   android:orientation="horizontal"
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
+                  android:background="#993300"
                   android:id="@+id/buttonContainer"
             >
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-        android:text="Transmit to: "
-    />
-    <TextView
-        android:id="@+id/contactName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-            android:text="Nobody"/></LinearLayout>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/contactnamedesc"
+                />
+        <TextView
+                android:id="@+id/contactName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nobody"/>
+    </LinearLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
+                  android:background="#002255"
                   android:id="@+id/buttonContainer"
             >
 
-    <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:onClick="chooseAction"
-            android:text="Choose an action"/>
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="chooseAction"
+                android:text="Choose an action"/>
 
-    <Button
-            android:id="@+id/otherTransmission"
+        <Button
+                android:id="@+id/otherTransmission"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="sendPicture"
+                android:text="Send Elsewhere"/>
+    </LinearLayout>
+    <ImageView
+            android:id="@+id/pictureView"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:onClick="sendPicture"
-            android:text="Send Elsewhere"/>
-        </LinearLayout>
-    <ImageView
-        android:id="@+id/pictureView"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#FF9900"
-        android:onClick="pictureTouched"
-        android:contentDescription="recent photo"/>
+            android:background="#FF9900"
+            android:onClick="pictureTouched"
+            android:contentDescription="recent photo"/>
 
 
 </LinearLayout>
