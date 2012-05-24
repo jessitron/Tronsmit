@@ -17,12 +17,15 @@
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
                   android:background="#993300"
-                  android:id="@+id/buttonContainer"
+                  android:paddingBottom="4dp"
+                  android:paddingTop="4dp"
             >
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/contactnamedesc"
+                android:paddingRight="4dp"
+                android:paddingLeft="8dp"
                 />
         <TextView
                 android:id="@+id/contactName"
@@ -44,13 +47,13 @@
                 android:onClick="chooseAction"
                 android:text="Choose an action"/>
 
-        <Button
-                android:id="@+id/otherTransmission"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:onClick="sendPicture"
-                android:text="Send Elsewhere"/>
     </LinearLayout>
+    <Button
+            android:id="@+id/otherTransmission"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="sendPicture"
+            android:text="Send Elsewhere"/>
     <ImageView
             android:id="@+id/pictureView"
             android:layout_width="fill_parent"

@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class PictureManager {
 
@@ -20,6 +21,7 @@ public class PictureManager {
             MediaStore.Images.ImageColumns.MIME_TYPE,           // 4
             DATE_ADDED                                                        // 5
     };
+    public static final int COL_IMAGE_TYPE = 4;
     private Cursor cursor;
     private ImageView imageView;
     private final Context context;
@@ -55,7 +57,7 @@ public class PictureManager {
     }
 
     public String getImageType() {
-        String imageType = cursor.getString(4);
+        String imageType = cursor.getString(COL_IMAGE_TYPE);
         Log.d(LOG_PREFIX, "The type of this image is " + imageType);
         return imageType;
     }
@@ -71,17 +73,27 @@ public class PictureManager {
 
     public void advance() {
         cursor.moveToNext();
+        advanceCursorPast3DImages();
         updateImageToCurrentPicture();
         putPicInView(imageView);
     }
 
     private void queryPictures() {
         closeCursor();
-        // TODO: is a managed query correct? we don't want to close it when we lose focus.
         cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, SELECTED_COLUMNS, null, null, DATE_ADDED + " DESC");
-        // TODO: this cursor is occasionally null ?!?
-        // like if the disk is not available -- check whether the disk is available.
+        // TODO: check whether the disk is available.
+        if (cursor == null) {
+            Toast.makeText(context,"Unable to read photographs", Toast.LENGTH_LONG).show();
+            return;
+        }
         cursor.moveToFirst();
+        advanceCursorPast3DImages();
+    }
+
+    private void advanceCursorPast3DImages() {
+        while("image/mpo".equals(cursor.getString(COL_IMAGE_TYPE)) && !cursor.isAfterLast()) {
+            cursor.moveToNext();
+        }
     }
 
     private void closeCursor() {

@@ -39,6 +39,13 @@ public class TransmitActivity extends Activity {
     private String name;
 
     private Button chooseActionButton;
+    private static final View.OnLongClickListener BUTTON_DELETING_LISTENER = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View view) {
+            ((ViewGroup)view.getParent()).removeView(view);
+            return true;
+        }
+    };
 
     /**
      * Called when the activity is first created.
@@ -60,13 +67,29 @@ public class TransmitActivity extends Activity {
         }
     }
 
-    private void examineDevice() {
-        Intent htcSpecialSend = new Intent("android.intent.action.SEND_MSG");
-        htcSpecialSend.setType("image/jpeg");
-        final List<ResolveInfo> htcSendResolution = getPackageManager().queryIntentActivities(htcSpecialSend, PackageManager.GET_INTENT_FILTERS | PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER);
-        boolean htcDevice = (htcSendResolution != null && !htcSendResolution.isEmpty());
-        say("HTC device? " + htcDevice);
+    private boolean checkForServiceIntentSupport(Intent intent) {
+        List<ResolveInfo> result = getPackageManager().queryIntentServices(intent, 0);
+        return (result != null && !result.isEmpty());
     }
+    private boolean checkForActivityIntentSupport(Intent intent) {
+        List<ResolveInfo> result = getPackageManager().queryIntentActivities(intent,
+                PackageManager.GET_INTENT_FILTERS | PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER);
+        return (result != null && !result.isEmpty());
+    }
+
+    private Intent createEditImageIntent() {
+        Intent editIntent = new Intent(Intent.ACTION_EDIT, pictureManager.getImageLocation());
+        editIntent.setType(pictureManager.getImageType());
+        return editIntent;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        setMenuItemEnablement(menu, R.id.flashy, checkForServiceIntentSupport(createFlashlightIntent()));
+        setMenuItemEnablement(menu, R.id.editpic, checkForActivityIntentSupport(createEditImageIntent()));
+        return super.onPrepareOptionsMenu(menu);
+    }
+
 
     private Intent createSendIntent(String action) {
         Intent shareIntent = new Intent(action);
@@ -93,34 +116,10 @@ public class TransmitActivity extends Activity {
     }
 
 
-    public void pictureTouched(View v) {
-        Toast.makeText(this, "you touched me", 3).show();
-        pictureManager.advance();
-    }
-
     public void sendPicture(View v) {
         Intent shareIntent = createSendIntent(Intent.ACTION_SEND);
 
         startActivity(shareIntent);
-    }
-
-
-    private void savePreferences(Uri contactUri) {
-        getPreferences(MODE_PRIVATE).edit().putString("contactUri", contactUri.toString()).apply();
-    }
-
-    private void loadPreferences() {
-        String uriString = getPreferences(MODE_PRIVATE).getString("contactUri", "");
-        if ("" != uriString) {
-            gotAContact(Uri.parse(uriString));
-        }
-        updateContactDescription();
-    }
-
-    private void updateContactDescription() {
-        TextView contactDescription = (TextView) findViewById(R.id.contactName);
-        contactDescription.setText(name);
-        contactDescription.invalidate();
     }
 
     public void pickContact(View v) {
@@ -165,6 +164,7 @@ public class TransmitActivity extends Activity {
                 chooseAction(view);
             }
         });
+        newButton.setOnLongClickListener(BUTTON_DELETING_LISTENER);
         buttonContainer.addView(newButton);
     }
 
@@ -274,8 +274,15 @@ public class TransmitActivity extends Activity {
             case R.id.flashy:
                 flashSomeLights();
                 return true;
+            case R.id.editpic:
+                editPicture();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void editPicture() {
+        startActivity(createEditImageIntent());
     }
 
     private void takePicture() {
@@ -284,25 +291,21 @@ public class TransmitActivity extends Activity {
     }
 
     private void flashSomeLights() {
+        Intent intent = createFlashlightIntent();
+        startService(intent);
+    }
+
+    private Intent createFlashlightIntent() {
         Intent intent = new Intent("com.teslacoilsw.intent.FLASHLIGHT");
         intent.putExtra("strobe", 10);
         intent.putExtra("timeout", 5);
-        startService(intent);
+        return intent;
     }
 
     private void dial() {
         Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber) );
         dialIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(dialIntent);
-    }
-
-    private void disableAllButtons() {
-        LinearLayout container = findButtonContainer();
-        for (int i = 0; i < container.getChildCount(); i++) {
-            if (container.getChildAt(i) instanceof Button) {
-                container.getChildAt(i).setEnabled(false);
-            }
-        }
     }
 
     private LinearLayout findButtonContainer() {
@@ -450,5 +453,59 @@ public class TransmitActivity extends Activity {
     public void onBackPressed() {
         say("onBackPressed");
         super.onBackPressed();    
+    }
+
+    private void examineDevice() {
+        remarkAboutHtc();
+    }
+
+    private void remarkAboutHtc() {
+        Intent htcSpecialSend = new Intent("android.intent.action.SEND_MSG");
+        htcSpecialSend.setType("image/jpeg");
+        boolean htcDevice = checkForActivityIntentSupport(htcSpecialSend);
+        say("HTC device? " + htcDevice);
+    }
+
+    private void disableAllButtons() {
+        LinearLayout container = findButtonContainer();
+        for (int i = 0; i < container.getChildCount(); i++) {
+            if (container.getChildAt(i) instanceof Button) {
+                container.getChildAt(i).setEnabled(false);
+            }
+        }
+    }
+
+
+    private void setMenuItemEnablement(Menu menu, int menuItemId, boolean enabled) {
+        for (int i = 0; i < menu.size(); i++) {
+            if (menu.getItem(i).getItemId() == menuItemId) {
+                menu.getItem(i).setEnabled(enabled);
+            }
+        }
+    }
+
+    public void pictureTouched(View v) {
+        //Toast.makeText(this, "you touched me", 3).show();
+        pictureManager.advance();
+    }
+
+
+
+    private void savePreferences(Uri contactUri) {
+        getPreferences(MODE_PRIVATE).edit().putString("contactUri", contactUri.toString()).apply();
+    }
+
+    private void loadPreferences() {
+        String uriString = getPreferences(MODE_PRIVATE).getString("contactUri", "");
+        if ("" != uriString) {
+            gotAContact(Uri.parse(uriString));
+        }
+        updateContactDescription();
+    }
+
+    private void updateContactDescription() {
+        TextView contactDescription = (TextView) findViewById(R.id.contactName);
+        contactDescription.setText(name);
+        contactDescription.invalidate();
     }
 }

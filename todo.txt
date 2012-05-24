@@ -14,15 +14,11 @@ X) Explore queryActivities. what is available for sending?
 
 5) onLongClick option to un-configure button
 
-6) add a new button whenever a new one is configured
-
-7) add a button for call.
-
 8) Explore flag to not remain in front.
 
 ) can the HTC MMS activity can be added programmatically?
 
-bug: make it skip past 3D photos
+bug: make it skip past 3D photos (test)
 
 ) in my chooser I might hit something that is not a default.
 
@@ -32,3 +28,4 @@ Silly stuff that would be fun:
 Presentation:
 - add a screenshot of choosing an activity, other interesting thing
 - add slides for alternate activity launch modes / intent flags.
+- Parts of an Intent: add flags
