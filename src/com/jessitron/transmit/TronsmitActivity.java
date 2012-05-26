@@ -26,11 +26,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class TransmitActivity extends Activity {
+public class TronsmitActivity extends Activity {
     private static final int PICK_CONTACT_REQUEST_CODE = 1;
     private static final int CHOOSE_INTENT_CODE = 2;
     private static final int TAKE_PICTURE_CODE = 3;
-    private static final String LOG_PREFIX = "TransmitActivity";
+    private static final String LOG_PREFIX = "TronsmitActivity";
 
     private PictureManager pictureManager;
 
