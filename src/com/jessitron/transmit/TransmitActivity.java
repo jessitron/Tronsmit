@@ -157,7 +157,7 @@ public class TransmitActivity extends Activity {
     private void addAbutton() {
         final LinearLayout buttonContainer = findButtonContainer();
         final Button newButton = new Button(this);
-        newButton.setText("Choose an action");
+        newButton.setText(R.string.chooseAction);
         newButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -170,6 +170,10 @@ public class TransmitActivity extends Activity {
 
     private void gotAnAction(final Intent data) {
         // note: this might not be a default action. could be trouble.
+        if (chooseActionButton == null) {
+            say("Bad news: action button unknown");
+            return;
+        }
         chooseActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -178,6 +182,7 @@ public class TransmitActivity extends Activity {
         });
         ActivityInfo info = data.resolveActivityInfo(getPackageManager(), 0);
         chooseActionButton.setText("Send to " + info.loadLabel(getPackageManager()));
+        chooseActionButton = null;
     }
 
     private void startActivityLike(final Intent data) {
@@ -277,8 +282,16 @@ public class TransmitActivity extends Activity {
             case R.id.editpic:
                 editPicture();
                 return true;
+            case R.id.reset:
+                reset();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void reset() {
+        findButtonContainer().removeAllViews();
+        addAbutton();
     }
 
     private void editPicture() {
@@ -345,12 +358,8 @@ public class TransmitActivity extends Activity {
             say("  " + resolveInfo.loadLabel(getPackageManager()));
         }
 
-        final Intent pickIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
-        pickIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent(Intent.ACTION_SEND));
-        startActivityForResult(pickIntent, CHOOSE_INTENT_CODE);
-
-        //printInfoAboutAllApplications();
-        //printInfoAboutAllPackages();
+        printInfoAboutAllApplications();
+        printInfoAboutAllPackages();
 
     }
 

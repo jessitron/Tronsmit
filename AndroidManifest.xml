@@ -15,7 +15,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HtcMmsForwarder" android:label="@string/forwardmms" android:finishOnTaskLaunch="true" android:noHistory="true">
+        <activity android:name=".HtcMmsForwarder" android:label="@string/forwardmms"
+                  android:finishOnTaskLaunch="true" android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <data android:mimeType="image/*"/>

@@ -6,32 +6,40 @@
               android:id="@+id/rootContainer"
         >
 
-    <Button
-            android:id="@+id/pickContact"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:onClick="pickContact"
-            android:text="Pick Contact"/>
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="horizontal"
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
-                  android:background="#993300"
-                  android:paddingBottom="4dp"
+                  android:background="#000000"
+                  android:paddingBottom="0dp"
                   android:paddingTop="4dp"
             >
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                      android:orientation="vertical"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:background="#000000"
+                      android:paddingLeft="4dp"
+                      android:paddingRight="4dp"
+                >
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/contactnamedesc"
-                android:paddingRight="4dp"
-                android:paddingLeft="8dp"
                 />
         <TextView
                 android:id="@+id/contactName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Nobody"/>
+        </LinearLayout>
+        <Button
+                android:id="@+id/pickContact"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="pickContact"
+                android:text="Pick Contact"/>
     </LinearLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
@@ -45,7 +53,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:onClick="chooseAction"
-                android:text="Choose an action"/>
+                android:text="@string/chooseAction"/>
 
     </LinearLayout>
     <Button
