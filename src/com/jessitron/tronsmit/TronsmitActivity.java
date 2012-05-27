@@ -1,5 +1,6 @@
-package com.jessitron.transmit;
+package com.jessitron.tronsmit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -11,6 +12,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.gesture.Gesture;
+import android.gesture.GestureLibraries;
+import android.gesture.GestureLibrary;
+import android.gesture.GestureOverlayView;
+import android.gesture.Prediction;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -31,6 +37,10 @@ public class TronsmitActivity extends Activity {
     private static final int CHOOSE_INTENT_CODE = 2;
     private static final int TAKE_PICTURE_CODE = 3;
     private static final String LOG_PREFIX = "TronsmitActivity";
+    public static final int PACKAGE_MANAGER_GET_INFO_FLAGS = PackageManager.GET_ACTIVITIES
+            | PackageManager.GET_INTENT_FILTERS
+            | PackageManager.GET_CONFIGURATIONS
+            | PackageManager.GET_META_DATA;
 
     private PictureManager pictureManager;
 
@@ -42,7 +52,7 @@ public class TronsmitActivity extends Activity {
     private static final View.OnLongClickListener BUTTON_DELETING_LISTENER = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View view) {
-            ((ViewGroup)view.getParent()).removeView(view);
+            ((ViewGroup) view.getParent()).removeView(view);
             return true;
         }
     };
@@ -57,6 +67,7 @@ public class TronsmitActivity extends Activity {
         setContentView(R.layout.main);
 
         loadPreferences();
+        loadGestures();
         examineDevice();
 
         pictureManager = new PictureManager((ImageView) findViewById(R.id.pictureView), getApplicationContext());
@@ -71,6 +82,7 @@ public class TronsmitActivity extends Activity {
         List<ResolveInfo> result = getPackageManager().queryIntentServices(intent, 0);
         return (result != null && !result.isEmpty());
     }
+
     private boolean checkForActivityIntentSupport(Intent intent) {
         List<ResolveInfo> result = getPackageManager().queryIntentActivities(intent,
                 PackageManager.GET_INTENT_FILTERS | PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER);
@@ -91,19 +103,20 @@ public class TronsmitActivity extends Activity {
     }
 
 
-    private Intent createSendIntent(String action) {
-        Intent shareIntent = new Intent(action);
+    private Intent createSendIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType(pictureManager.getImageType());
         shareIntent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
 
         // everything needs the data
         shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
 
-        // MMS on non-HTC
-        shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, phoneNumber);
-
-        // HTC
-        shareIntent.putExtra("address", phoneNumber);
+        if (phoneNumber != null) {
+            // MMS on non-HTC
+            shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, phoneNumber);
+            // HTC
+            shareIntent.putExtra("address", phoneNumber);
+        }
         shareIntent.putExtra("sms_body", R.string.attribution);
 
         // Email
@@ -117,7 +130,7 @@ public class TronsmitActivity extends Activity {
 
 
     public void sendPicture(View v) {
-        Intent shareIntent = createSendIntent(Intent.ACTION_SEND);
+        Intent shareIntent = createSendIntent();
 
         startActivity(shareIntent);
     }
@@ -133,7 +146,7 @@ public class TronsmitActivity extends Activity {
         //final Intent pickActivityIntent = Intent.createChooser(createSendIntent(Intent.ACTION_SEND), "What should this button do?");
         final Intent pickActivityIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
         pickActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        pickActivityIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent(Intent.ACTION_SEND));
+        pickActivityIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent());
         pickActivityIntent.putExtra(Intent.EXTRA_TITLE, "what should this button do?");
         chooseActionButton = (Button) v;
         startActivityForResult(pickActivityIntent, CHOOSE_INTENT_CODE);
@@ -186,7 +199,7 @@ public class TronsmitActivity extends Activity {
     }
 
     private void startActivityLike(final Intent data) {
-        Intent send = createSendIntent(data.getAction());
+        Intent send = createSendIntent();
         send.setComponent(data.getComponent());
         startActivity(send);
     }
@@ -299,7 +312,7 @@ public class TronsmitActivity extends Activity {
     }
 
     private void takePicture() {
-       Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(pictureIntent, TAKE_PICTURE_CODE);
     }
 
@@ -316,7 +329,7 @@ public class TronsmitActivity extends Activity {
     }
 
     private void dial() {
-        Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber) );
+        Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
         dialIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(dialIntent);
     }
@@ -344,9 +357,9 @@ public class TronsmitActivity extends Activity {
     }
 
     private void printStuff() {
-        Intent shareIntent = createSendIntent(Intent.ACTION_SEND);
+        Intent shareIntent = createSendIntent();
         List<ResolveInfo> result = getPackageManager().queryIntentActivityOptions(null, null, shareIntent,
-                PackageManager.MATCH_DEFAULT_ONLY & PackageManager.GET_INTENT_FILTERS & PackageManager.GET_RESOLVED_FILTER);
+                PackageManager.MATCH_DEFAULT_ONLY | PACKAGE_MANAGER_GET_INFO_FLAGS | PackageManager.GET_RESOLVED_FILTER);
 
         say("Activities available for send: -----------------------  ");
         for (ResolveInfo resolveInfo : result) {
@@ -367,16 +380,16 @@ public class TronsmitActivity extends Activity {
     private void printInfoAboutAllApplications() {
         say("========================");
 
-        for (ApplicationInfo applicationInfo : getPackageManager().getInstalledApplications(0)) {
+        for (ApplicationInfo applicationInfo : getPackageManager().getInstalledApplications(PACKAGE_MANAGER_GET_INFO_FLAGS)) {
             say("Application info: " + applicationInfo);
-            say(applicationInfo.className);
+            say(applicationInfo.packageName);
         }
     }
 
-    private void printInfoAboutAllPackages() {
+    private void printInfoAboutAllPackages() { // This is more useful than the applications. PackageInfo has an ApplicationInfo, and it has a list of the activities.
         say("========================");
 
-        for (PackageInfo packageInfo : getPackageManager().getInstalledPackages(0)) {
+        for (PackageInfo packageInfo : getPackageManager().getInstalledPackages(PACKAGE_MANAGER_GET_INFO_FLAGS)) {
             say("Package info: " + packageInfo);
             say(packageInfo.packageName);
             if (packageInfo.activities != null) {
@@ -399,7 +412,7 @@ public class TronsmitActivity extends Activity {
     @Override
     protected void onStop() {
         say("onStop");
-        super.onStop();    
+        super.onStop();
     }
 
     @Override
@@ -425,43 +438,43 @@ public class TronsmitActivity extends Activity {
     @Override
     protected void onPause() {
         say("onPause");
-        super.onPause();    
+        super.onPause();
     }
 
     @Override
     protected void onUserLeaveHint() {
         say("onUserLeaveHint");
-        super.onUserLeaveHint();    
+        super.onUserLeaveHint();
     }
 
     @Override
     protected void onPostResume() {
         say("onPostResume");
-        super.onPostResume();    
+        super.onPostResume();
     }
 
     @Override
     protected void onRestart() {
         say("onRestart");
-        super.onRestart();    
+        super.onRestart();
     }
 
     @Override
     protected void onStart() {
         say("onStart");
-        super.onStart();    
+        super.onStart();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         say("onConfigChanged");
-        super.onConfigurationChanged(newConfig);    
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override
     public void onBackPressed() {
         say("onBackPressed");
-        super.onBackPressed();    
+        super.onBackPressed();
     }
 
     private void examineDevice() {
@@ -495,9 +508,8 @@ public class TronsmitActivity extends Activity {
 
     public void pictureTouched(View v) {
         //Toast.makeText(this, "you touched me", 3).show();
-        pictureManager.advance();
+        pictureManager.older();
     }
-
 
 
     private void savePreferences(Uri contactUri) {
@@ -517,4 +529,33 @@ public class TronsmitActivity extends Activity {
         contactDescription.setText(name);
         contactDescription.invalidate();
     }
+
+    private void loadGestures() {
+        final GestureLibrary gestureLibrary = GestureLibraries.fromRawResource(getApplicationContext(), getResources().getIdentifier("raw/gestures", null, getPackageName()));
+        if (!gestureLibrary.load()) {
+            Toast.makeText(this, "Warning: unable to load gestures", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        GestureOverlayView gestures = (GestureOverlayView) findViewById(R.id.gestures);
+        gestures.addOnGesturePerformedListener(new GestureOverlayView.OnGesturePerformedListener() {
+            @Override
+            public void onGesturePerformed(GestureOverlayView gestureOverlayView, Gesture gesture) {
+                ArrayList<Prediction> predictions = gestureLibrary.recognize(gesture);
+                if (predictions.size() > 0) {
+                    Prediction prediction = predictions.get(0);
+                    if (prediction.score > 1.0) {
+                        if ("older".equals(prediction.name)) {
+                            pictureManager.older();
+                        } else if ("newer".equals(prediction.name)) {
+                            pictureManager.newer();
+                        } else if ("tronsmit".equals(prediction.name)) {
+                            sendPicture(null);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
 }

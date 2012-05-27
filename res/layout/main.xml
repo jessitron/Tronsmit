@@ -45,7 +45,7 @@
                   android:orientation="vertical"
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
-                  android:background="#002255"
+                  android:background="#000000"
                   android:id="@+id/buttonContainer"
             >
 
@@ -56,12 +56,11 @@
                 android:text="@string/chooseAction"/>
 
     </LinearLayout>
-    <Button
-            android:id="@+id/otherTransmission"
+    <android.gesture.GestureOverlayView
+            android:id="@+id/gestures"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:onClick="sendPicture"
-            android:text="Send Elsewhere"/>
+            android:layout_weight="1.0" >
     <ImageView
             android:id="@+id/pictureView"
             android:layout_width="fill_parent"
@@ -69,6 +68,7 @@
             android:background="#FF9900"
             android:onClick="pictureTouched"
             android:contentDescription="recent photo"/>
+    </android.gesture.GestureOverlayView>
 
 
 </LinearLayout>

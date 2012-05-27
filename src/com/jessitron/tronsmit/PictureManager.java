@@ -1,4 +1,4 @@
-package com.jessitron.transmit;
+package com.jessitron.tronsmit;
 
 import static android.provider.MediaStore.Images.ImageColumns.DATE_TAKEN;
 import static android.provider.MediaStore.MediaColumns.DATE_ADDED;
@@ -31,11 +31,11 @@ public class PictureManager {
         this.imageView = imageView;
         this.context = context;
     }
-    
+
     public void reset() {
         queryPictures();
         updateImageToCurrentPicture();
-        
+
     }
 
     public boolean hasPicture() {
@@ -43,13 +43,13 @@ public class PictureManager {
     }
 
     private void updateImageToCurrentPicture() {
-       if (cursor.isAfterLast()) {
-           Log.d(LOG_PREFIX, "No pictures found");
-           clearView();
-       } else {
-        putPicInView(imageView);
-        imageView.invalidate();
-       }
+        if (cursor.isAfterLast()) {
+            Log.d(LOG_PREFIX, "No pictures found");
+            clearView();
+        } else {
+            putPicInView(imageView);
+            imageView.invalidate();
+        }
     }
 
     private void clearView() {
@@ -61,9 +61,9 @@ public class PictureManager {
         Log.d(LOG_PREFIX, "The type of this image is " + imageType);
         return imageType;
     }
-    
+
     public Uri getImageLocation() {
-        return  Uri.parse( "file://" + cursor.getString(1));
+        return Uri.parse("file://" + cursor.getString(1));
     }
 
 
@@ -71,11 +71,20 @@ public class PictureManager {
         imageView.setImageURI(getImageLocation());
     }
 
-    public void advance() {
-        cursor.moveToNext();
-        advanceCursorPast3DImages();
-        updateImageToCurrentPicture();
-        putPicInView(imageView);
+    public void older() {
+        if (!cursor.isLast()) {
+            cursor.moveToNext();
+            updateImageToCurrentPicture();
+            putPicInView(imageView);
+        }
+    }
+
+    public void newer() {
+        if (!cursor.isFirst()) {
+            cursor.moveToPrevious();
+            updateImageToCurrentPicture();
+            putPicInView(imageView);
+        }
     }
 
     private void queryPictures() {
@@ -83,17 +92,10 @@ public class PictureManager {
         cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, SELECTED_COLUMNS, null, null, DATE_ADDED + " DESC");
         // TODO: check whether the disk is available.
         if (cursor == null) {
-            Toast.makeText(context,"Unable to read photographs", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Unable to read photographs", Toast.LENGTH_LONG).show();
             return;
         }
         cursor.moveToFirst();
-        advanceCursorPast3DImages();
-    }
-
-    private void advanceCursorPast3DImages() {
-        while("image/mpo".equals(cursor.getString(COL_IMAGE_TYPE)) && !cursor.isAfterLast()) {
-            cursor.moveToNext();
-        }
     }
 
     private void closeCursor() {
