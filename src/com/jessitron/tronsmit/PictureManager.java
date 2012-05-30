@@ -5,6 +5,8 @@ import static android.provider.MediaStore.MediaColumns.DATE_ADDED;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -22,9 +24,12 @@ public class PictureManager {
             DATE_ADDED                                                        // 5
     };
     public static final int COL_IMAGE_TYPE = 4;
+    public static final int COL_IMAGE_URI = 1;
     private Cursor cursor;
     private ImageView imageView;
     private final Context context;
+    private Uri imageUri;
+    private String imageType;
 
 
     public PictureManager(ImageView imageView, Context context) {
@@ -47,8 +52,7 @@ public class PictureManager {
             Log.d(LOG_PREFIX, "No pictures found");
             clearView();
         } else {
-            putPicInView(imageView);
-            imageView.invalidate();
+            putPicInView();
         }
     }
 
@@ -57,33 +61,37 @@ public class PictureManager {
     }
 
     public String getImageType() {
-        String imageType = cursor.getString(COL_IMAGE_TYPE);
-        Log.d(LOG_PREFIX, "The type of this image is " + imageType);
         return imageType;
     }
 
     public Uri getImageLocation() {
-        return Uri.parse("file://" + cursor.getString(1));
+        return imageUri;
     }
 
 
-    private void putPicInView(ImageView imageView) {
-        imageView.setImageURI(getImageLocation());
+    private void putPicInView() {
+        // Let's try to completely delete the old one, in the hopes that bitmap space will run out less frequently.
+        final Drawable drawable = imageView.getDrawable();
+        if (drawable != null && drawable instanceof BitmapDrawable) {
+            ((BitmapDrawable) drawable).getBitmap().recycle();
+        }
+        imageView.setImageURI(imageUri);
+        imageView.invalidate();
     }
 
     public void older() {
         if (!cursor.isLast()) {
             cursor.moveToNext();
+            pullInfoFromCursor();
             updateImageToCurrentPicture();
-            putPicInView(imageView);
         }
     }
 
     public void newer() {
         if (!cursor.isFirst()) {
             cursor.moveToPrevious();
+            pullInfoFromCursor();
             updateImageToCurrentPicture();
-            putPicInView(imageView);
         }
     }
 
@@ -96,6 +104,14 @@ public class PictureManager {
             return;
         }
         cursor.moveToFirst();
+        pullInfoFromCursor();
+    }
+
+    private void pullInfoFromCursor() {
+        if (!cursor.isAfterLast()) {
+            imageUri = Uri.parse("file://" + cursor.getString(COL_IMAGE_URI));
+            imageType = cursor.getString(COL_IMAGE_TYPE);
+        }
     }
 
     private void closeCursor() {
@@ -109,4 +125,9 @@ public class PictureManager {
         imageView = null;
     }
 
+    public void useThisOne(Uri data) {
+        imageUri = data;
+        imageType = "image/jpeg"; // I'm cheating. If this isn't right it will fail
+        putPicInView();
+    }
 }

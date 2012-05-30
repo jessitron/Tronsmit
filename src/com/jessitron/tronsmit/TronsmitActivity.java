@@ -33,9 +33,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class TronsmitActivity extends Activity {
-    private static final int PICK_CONTACT_REQUEST_CODE = 1;
-    private static final int CHOOSE_INTENT_CODE = 2;
-    private static final int TAKE_PICTURE_CODE = 3;
+    private static final int REQUEST_CODE_PICK_CONTACT = 1;
+    private static final int REQUEST_CODE_CHOOSE_INTENT = 2;
+    private static final int REQUEST_CODE_TAKE_PICTURE = 3;
+    private static final int REQUEST_CODE_PICK_IMAGE = 4;
     private static final String LOG_PREFIX = "TronsmitActivity";
     public static final int PACKAGE_MANAGER_GET_INFO_FLAGS = PackageManager.GET_ACTIVITIES
             | PackageManager.GET_INTENT_FILTERS
@@ -68,7 +69,6 @@ public class TronsmitActivity extends Activity {
 
         loadPreferences();
         loadGestures();
-        examineDevice();
 
         pictureManager = new PictureManager((ImageView) findViewById(R.id.pictureView), getApplicationContext());
         pictureManager.reset();
@@ -76,6 +76,13 @@ public class TronsmitActivity extends Activity {
             disableAllButtons();
             toast("This app is useless without pictures");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        say("onResume called");
+
     }
 
     private boolean checkForServiceIntentSupport(Intent intent) {
@@ -104,32 +111,27 @@ public class TronsmitActivity extends Activity {
 
 
     private Intent createSendIntent() {
+
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType(pictureManager.getImageType());
-        shareIntent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
-
-        // everything needs the data
         shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
 
         if (phoneNumber != null) {
-            // MMS on non-HTC
             shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, phoneNumber);
-            // HTC
             shareIntent.putExtra("address", phoneNumber);
         }
-        shareIntent.putExtra("sms_body", R.string.attribution);
+        shareIntent.putExtra("sms_body", getString(R.string.attribution));
+        shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.attribution));
 
-        // Email
         if (email != null) {
             shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
         }
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "sent by Tronsmit");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.attribution));
 
         return shareIntent;
     }
 
-
-    public void sendPicture(View v) {
+    public void tronsmit(View v) {
         Intent shareIntent = createSendIntent();
 
         startActivity(shareIntent);
@@ -139,46 +141,38 @@ public class TronsmitActivity extends Activity {
         final Intent pickContactsIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
         ResolveInfo resolved = getPackageManager().resolveActivity(pickContactsIntent, 0);
         say("pick contact resolves to: " + resolved.activityInfo.name);
-        startActivityForResult(pickContactsIntent, PICK_CONTACT_REQUEST_CODE);
+        startActivityForResult(pickContactsIntent, REQUEST_CODE_PICK_CONTACT);
     }
 
     public void chooseAction(View v) {
-        //final Intent pickActivityIntent = Intent.createChooser(createSendIntent(Intent.ACTION_SEND), "What should this button do?");
-        final Intent pickActivityIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
-        pickActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        pickActivityIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent());
-        pickActivityIntent.putExtra(Intent.EXTRA_TITLE, "what should this button do?");
-        chooseActionButton = (Button) v;
-        startActivityForResult(pickActivityIntent, CHOOSE_INTENT_CODE);
+            chooseActionButton = (Button) v;
+
+            final Intent pickActivityIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
+            pickActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            pickActivityIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent());
+            pickActivityIntent.putExtra(Intent.EXTRA_TITLE, "what should this button do?");
+
+            startActivityForResult(pickActivityIntent, REQUEST_CODE_CHOOSE_INTENT);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
-        if (requestCode == PICK_CONTACT_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_CODE_PICK_CONTACT && resultCode == RESULT_OK) {
             if (resultCode == RESULT_OK) {
                 gotAContact(data.getData());
                 savePreferences(data.getData());
             }
-        } else if (requestCode == CHOOSE_INTENT_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == REQUEST_CODE_CHOOSE_INTENT && resultCode == RESULT_OK) {
             gotAnAction(data);
-            addAbutton();
-        } else if (requestCode == TAKE_PICTURE_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == REQUEST_CODE_TAKE_PICTURE && resultCode == RESULT_OK) {
             pictureManager.reset(); // find the new picture
+        } else if (requestCode == REQUEST_CODE_PICK_IMAGE && resultCode == RESULT_OK) {
+            gotAnImage(data.getData());
         }
     }
 
-    private void addAbutton() {
-        final LinearLayout buttonContainer = findButtonContainer();
-        final Button newButton = new Button(this);
-        newButton.setText(R.string.chooseAction);
-        newButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                chooseAction(view);
-            }
-        });
-        newButton.setOnLongClickListener(BUTTON_DELETING_LISTENER);
-        buttonContainer.addView(newButton);
+    private void gotAnImage(Uri data) {
+        pictureManager.useThisOne(data);
     }
 
     private void gotAnAction(final Intent data) {
@@ -196,6 +190,7 @@ public class TronsmitActivity extends Activity {
         ActivityInfo info = data.resolveActivityInfo(getPackageManager(), 0);
         chooseActionButton.setText("Send to " + info.loadLabel(getPackageManager()));
         chooseActionButton = null;
+        addAbutton();
     }
 
     private void startActivityLike(final Intent data) {
@@ -283,20 +278,23 @@ public class TronsmitActivity extends Activity {
             case R.id.printstuff:
                 printStuff();
                 return true;
-            case R.id.dial:
-                dial();
-                return true;
             case R.id.camera:
                 takePicture();
-                return true;
-            case R.id.flashy:
-                flashSomeLights();
                 return true;
             case R.id.editpic:
                 editPicture();
                 return true;
             case R.id.reset:
                 reset();
+                return true;
+            case R.id.choosepic:
+                pickArbitraryImage();
+                return true;
+            case R.id.flashy:
+                flashSomeLights();
+                return true;
+            case R.id.dial:
+                dial();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -311,9 +309,16 @@ public class TronsmitActivity extends Activity {
         startActivity(createEditImageIntent());
     }
 
+    private void pickArbitraryImage() {
+            Intent pickIntent = new Intent(Intent.ACTION_PICK);
+            pickIntent.setType("image/*");
+            startActivityForResult(pickIntent, REQUEST_CODE_PICK_IMAGE);
+
+    }
+
     private void takePicture() {
         Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(pictureIntent, TAKE_PICTURE_CODE);
+        startActivityForResult(pictureIntent, REQUEST_CODE_TAKE_PICTURE);
     }
 
     private void flashSomeLights() {
@@ -357,8 +362,7 @@ public class TronsmitActivity extends Activity {
     }
 
     private void printStuff() {
-        Intent shareIntent = createSendIntent();
-        List<ResolveInfo> result = getPackageManager().queryIntentActivityOptions(null, null, shareIntent,
+        List<ResolveInfo> result = getPackageManager().queryIntentActivityOptions(null, null, createSendIntent(),
                 PackageManager.MATCH_DEFAULT_ONLY | PACKAGE_MANAGER_GET_INFO_FLAGS | PackageManager.GET_RESOLVED_FILTER);
 
         say("Activities available for send: -----------------------  ");
@@ -402,12 +406,6 @@ public class TronsmitActivity extends Activity {
     }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        say("onResume called");
-        pictureManager.reset();
-    }
 
     @Override
     protected void onStop() {
@@ -477,17 +475,6 @@ public class TronsmitActivity extends Activity {
         super.onBackPressed();
     }
 
-    private void examineDevice() {
-        remarkAboutHtc();
-    }
-
-    private void remarkAboutHtc() {
-        Intent htcSpecialSend = new Intent("android.intent.action.SEND_MSG");
-        htcSpecialSend.setType("image/jpeg");
-        boolean htcDevice = checkForActivityIntentSupport(htcSpecialSend);
-        say("HTC device? " + htcDevice);
-    }
-
     private void disableAllButtons() {
         LinearLayout container = findButtonContainer();
         for (int i = 0; i < container.getChildCount(); i++) {
@@ -506,12 +493,6 @@ public class TronsmitActivity extends Activity {
         }
     }
 
-    public void pictureTouched(View v) {
-        //Toast.makeText(this, "you touched me", 3).show();
-        pictureManager.older();
-    }
-
-
     private void savePreferences(Uri contactUri) {
         getPreferences(MODE_PRIVATE).edit().putString("contactUri", contactUri.toString()).apply();
     }
@@ -528,6 +509,20 @@ public class TronsmitActivity extends Activity {
         TextView contactDescription = (TextView) findViewById(R.id.contactName);
         contactDescription.setText(name);
         contactDescription.invalidate();
+    }
+
+    private void addAbutton() {
+        final LinearLayout buttonContainer = findButtonContainer();
+        final Button newButton = new Button(this);
+        newButton.setText(R.string.chooseAction);
+        newButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                chooseAction(view);
+            }
+        });
+        newButton.setOnLongClickListener(BUTTON_DELETING_LISTENER);
+        buttonContainer.addView(newButton);
     }
 
     private void loadGestures() {
@@ -550,7 +545,7 @@ public class TronsmitActivity extends Activity {
                         } else if ("newer".equals(prediction.name)) {
                             pictureManager.newer();
                         } else if ("tronsmit".equals(prediction.name)) {
-                            sendPicture(null);
+                            tronsmit(null);
                         }
                     }
                 }
