@@ -85,14 +85,16 @@ public class TronsmitActivity extends Activity {
 
     }
 
-    private boolean checkForServiceIntentSupport(Intent intent) {
+    private boolean isServiceSupported(Intent intent) {
         List<ResolveInfo> result = getPackageManager().queryIntentServices(intent, 0);
         return (result != null && !result.isEmpty());
     }
 
-    private boolean checkForActivityIntentSupport(Intent intent) {
+    private boolean isActivitySupported(Intent intent) {
         List<ResolveInfo> result = getPackageManager().queryIntentActivities(intent,
-                PackageManager.GET_INTENT_FILTERS | PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER);
+                PackageManager.MATCH_DEFAULT_ONLY
+                        | PackageManager.GET_RESOLVED_FILTER
+                        | PackageManager.GET_INTENT_FILTERS);
         return (result != null && !result.isEmpty());
     }
 
@@ -104,8 +106,8 @@ public class TronsmitActivity extends Activity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        setMenuItemEnablement(menu, R.id.flashy, checkForServiceIntentSupport(createFlashlightIntent()));
-        setMenuItemEnablement(menu, R.id.editpic, checkForActivityIntentSupport(createEditImageIntent()));
+        setMenuItemEnablement(menu, R.id.flashy, isServiceSupported(createFlashlightIntent()));
+        setMenuItemEnablement(menu, R.id.editpic, isActivitySupported(createEditImageIntent()));
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -138,30 +140,37 @@ public class TronsmitActivity extends Activity {
     }
 
     public void pickContact(View v) {
-        final Intent pickContactsIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-        ResolveInfo resolved = getPackageManager().resolveActivity(pickContactsIntent, 0);
-        say("pick contact resolves to: " + resolved.activityInfo.name);
-        startActivityForResult(pickContactsIntent, REQUEST_CODE_PICK_CONTACT);
+
+        final Intent pickContactsIntent =
+                new Intent(
+                        Intent.ACTION_PICK,
+                        ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(
+                pickContactsIntent,
+                REQUEST_CODE_PICK_CONTACT);
+
     }
 
     public void chooseAction(View v) {
-            chooseActionButton = (Button) v;
+        chooseActionButton = (Button) v;
 
-            final Intent pickActivityIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
-            pickActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-            pickActivityIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent());
-            pickActivityIntent.putExtra(Intent.EXTRA_TITLE, "what should this button do?");
+        final Intent pickActivityIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
+        pickActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        pickActivityIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent());
+        pickActivityIntent.putExtra(Intent.EXTRA_TITLE, "what should this button do?");
 
-            startActivityForResult(pickActivityIntent, REQUEST_CODE_CHOOSE_INTENT);
+        startActivityForResult(pickActivityIntent, REQUEST_CODE_CHOOSE_INTENT);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
-        if (requestCode == REQUEST_CODE_PICK_CONTACT && resultCode == RESULT_OK) {
-            if (resultCode == RESULT_OK) {
-                gotAContact(data.getData());
-                savePreferences(data.getData());
-            }
+    protected void onActivityResult(int requestCode,
+                                    int resultCode,
+                                    final Intent data) {
+        if (requestCode == REQUEST_CODE_PICK_CONTACT
+                && resultCode == RESULT_OK) {
+            gotAContact(data.getData());
+            savePreferences(data.getData());
+
         } else if (requestCode == REQUEST_CODE_CHOOSE_INTENT && resultCode == RESULT_OK) {
             gotAnAction(data);
         } else if (requestCode == REQUEST_CODE_TAKE_PICTURE && resultCode == RESULT_OK) {
@@ -197,6 +206,41 @@ public class TronsmitActivity extends Activity {
         Intent send = createSendIntent();
         send.setComponent(data.getComponent());
         startActivity(send);
+    }
+
+
+    private void editPicture() {
+        startActivity(createEditImageIntent());
+    }
+
+    private void pickArbitraryImage() {
+        Intent pickIntent = new Intent(Intent.ACTION_PICK);
+        pickIntent.setType("image/*");
+        startActivityForResult(pickIntent, REQUEST_CODE_PICK_IMAGE);
+
+    }
+
+    private void takePicture() {
+        Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(pictureIntent, REQUEST_CODE_TAKE_PICTURE);
+    }
+
+    private void flashSomeLights() {
+        Intent intent = createFlashlightIntent();
+        startService(intent);
+    }
+
+    private Intent createFlashlightIntent() {
+        Intent intent = new Intent("com.teslacoilsw.intent.FLASHLIGHT");
+        intent.putExtra("strobe", 10);
+        intent.putExtra("timeout", 5);
+        return intent;
+    }
+
+    private void dial() {
+        Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
+        dialIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(dialIntent);
     }
 
     private void gotAContact(android.net.Uri uri) {
@@ -303,41 +347,9 @@ public class TronsmitActivity extends Activity {
     private void reset() {
         findButtonContainer().removeAllViews();
         addAbutton();
+        pictureManager.reset();
     }
 
-    private void editPicture() {
-        startActivity(createEditImageIntent());
-    }
-
-    private void pickArbitraryImage() {
-            Intent pickIntent = new Intent(Intent.ACTION_PICK);
-            pickIntent.setType("image/*");
-            startActivityForResult(pickIntent, REQUEST_CODE_PICK_IMAGE);
-
-    }
-
-    private void takePicture() {
-        Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(pictureIntent, REQUEST_CODE_TAKE_PICTURE);
-    }
-
-    private void flashSomeLights() {
-        Intent intent = createFlashlightIntent();
-        startService(intent);
-    }
-
-    private Intent createFlashlightIntent() {
-        Intent intent = new Intent("com.teslacoilsw.intent.FLASHLIGHT");
-        intent.putExtra("strobe", 10);
-        intent.putExtra("timeout", 5);
-        return intent;
-    }
-
-    private void dial() {
-        Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
-        dialIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(dialIntent);
-    }
 
     private LinearLayout findButtonContainer() {
         return (LinearLayout) findViewById(R.id.buttonContainer);
@@ -393,7 +405,14 @@ public class TronsmitActivity extends Activity {
     private void printInfoAboutAllPackages() { // This is more useful than the applications. PackageInfo has an ApplicationInfo, and it has a list of the activities.
         say("========================");
 
-        for (PackageInfo packageInfo : getPackageManager().getInstalledPackages(PACKAGE_MANAGER_GET_INFO_FLAGS)) {
+        final List<PackageInfo> installedPackages = getPackageManager().getInstalledPackages(
+                PackageManager.GET_ACTIVITIES
+                        | PackageManager.GET_INTENT_FILTERS
+                        | PackageManager.GET_CONFIGURATIONS
+                        | PackageManager.GET_META_DATA);
+
+        for (PackageInfo packageInfo :                installedPackages)
+        {
             say("Package info: " + packageInfo);
             say(packageInfo.packageName);
             if (packageInfo.activities != null) {
@@ -404,7 +423,6 @@ public class TronsmitActivity extends Activity {
             }
         }
     }
-
 
 
     @Override
@@ -418,19 +436,6 @@ public class TronsmitActivity extends Activity {
         pictureManager.shutDown();
         say("onDestroy");
         super.onDestroy();
-        unbindDrawables(findViewById(R.id.rootContainer));
-    }
-
-    private void unbindDrawables(View view) {
-        if (view.getBackground() != null) {
-            view.getBackground().setCallback(null);
-        }
-        if (view instanceof ViewGroup) {
-            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-                unbindDrawables(((ViewGroup) view).getChildAt(i));
-            }
-            ((ViewGroup) view).removeAllViews();
-        }
     }
 
     @Override

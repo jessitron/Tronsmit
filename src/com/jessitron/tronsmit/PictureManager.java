@@ -71,12 +71,16 @@ public class PictureManager {
 
     private void putPicInView() {
         // Let's try to completely delete the old one, in the hopes that bitmap space will run out less frequently.
+        recycleBitmap();
+        imageView.setImageURI(imageUri);
+        imageView.invalidate();
+    }
+
+    private void recycleBitmap() {
         final Drawable drawable = imageView.getDrawable();
         if (drawable != null && drawable instanceof BitmapDrawable) {
             ((BitmapDrawable) drawable).getBitmap().recycle();
         }
-        imageView.setImageURI(imageUri);
-        imageView.invalidate();
     }
 
     public void older() {
@@ -122,6 +126,7 @@ public class PictureManager {
 
     public void shutDown() {
         closeCursor();
+        recycleBitmap();
         imageView = null;
     }
 

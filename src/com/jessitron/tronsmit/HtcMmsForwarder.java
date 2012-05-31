@@ -39,8 +39,11 @@ public class HtcMmsForwarder extends Activity {
     }
 
     private boolean checkForActivityIntentSupport(Intent intent) {
-        List<ResolveInfo> result = getPackageManager().queryIntentActivities(intent,
-                PackageManager.GET_INTENT_FILTERS | PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_RESOLVED_FILTER);
+        List<ResolveInfo> result =
+                getPackageManager().queryIntentActivities(intent,
+                PackageManager.GET_INTENT_FILTERS
+                        | PackageManager.MATCH_DEFAULT_ONLY
+                        | PackageManager.GET_RESOLVED_FILTER);
         return (result != null && !result.isEmpty());
     }
 }
