@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -166,6 +167,7 @@ public class TronsmitActivity extends Activity {
     protected void onActivityResult(int requestCode,
                                     int resultCode,
                                     final Intent data) {
+
         if (requestCode == REQUEST_CODE_PICK_CONTACT
                 && resultCode == RESULT_OK) {
             gotAContact(data.getData());
@@ -196,10 +198,17 @@ public class TronsmitActivity extends Activity {
                 startActivityLike(data);
             }
         });
+
         ActivityInfo info = data.resolveActivityInfo(getPackageManager(), 0);
         chooseActionButton.setText("Send to " + info.loadLabel(getPackageManager()));
+
         chooseActionButton = null;
         addAbutton();
+        addToSavedButtonConfiguration(data.getComponent());
+    }
+
+    private void addToSavedButtonConfiguration(ComponentName component) {
+       // getPreferences(MODE_PRIVATE).edit().p
     }
 
     private void startActivityLike(final Intent data) {

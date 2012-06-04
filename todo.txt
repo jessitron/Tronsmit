@@ -3,18 +3,16 @@ Stories:
 X) Explore queryActivities. what is available for sending?
 
 2) Make the button "pick contact" until you pick one
- a) Make "pick contact" transform its message and onClick
- b) make it create a new button and add it
+ X) Make "pick contact" transform its message and onClick
+ X) make it create a new button and add it
  c) Make it save its settings and load them all, creating buttons.
- d) Make a menu option to reset
+ X) Make a menu option to reset
 
-3) then pick ... if HTC, SEND_MSG or Send. If Send, choose destination.
+X) then pick ... if HTC, SEND_MSG or Send. If Send, choose destination.
 
-4) gesture to move to previous picture
+X) gesture to move to previous picture
 
-5) onLongClick option to un-configure button
-
-8) Explore flag to not remain in front.
+-) onLongClick option to un-configure button
 
 ) can the HTC MMS activity can be added programmatically?
 
@@ -25,7 +23,3 @@ bug: make it skip past 3D photos (test)
 Silly stuff that would be fun:
 - default the phone number to the one most frequently texted (or texted pictures)
 
-Presentation:
-- add a screenshot of choosing an activity, other interesting thing
-- add slides for alternate activity launch modes / intent flags.
-- Parts of an Intent: add flags

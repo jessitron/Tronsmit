@@ -40,7 +40,6 @@ public class PictureManager {
     public void reset() {
         queryPictures();
         updateImageToCurrentPicture();
-
     }
 
     public boolean hasPicture() {
@@ -72,6 +71,7 @@ public class PictureManager {
     private void putPicInView() {
         // Let's try to completely delete the old one, in the hopes that bitmap space will run out less frequently.
         recycleBitmap();
+        imageView.setImageBitmap(null);
         imageView.setImageURI(imageUri);
         imageView.invalidate();
     }
@@ -96,6 +96,9 @@ public class PictureManager {
             cursor.moveToPrevious();
             pullInfoFromCursor();
             updateImageToCurrentPicture();
+        } else {
+            // we are on the first picture. Reload
+            reset();
         }
     }
 
