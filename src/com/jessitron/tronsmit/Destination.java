@@ -8,13 +8,13 @@ import android.util.Log;
 
 public class Destination {
 
-    private final Uri contactUrl;
+    private final Uri contactUri;
     private String phoneNumber;
     private String email;
     private String name;
 
     public Destination(ContentResolver cr, Uri contactUri) {
-        this.contactUrl = contactUri;
+        this.contactUri = contactUri;
 
         long contactId = loadNameAndId(cr, contactUri);
 
@@ -92,5 +92,9 @@ public class Destination {
 
     private void say(String s) {
         Log.d(TronsmitActivity.LOG_PREFIX, "JessiTRON! " + s);
+    }
+
+    public Uri getContactUri() {
+        return contactUri;
     }
 }

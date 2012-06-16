@@ -17,4 +17,9 @@ public class TronsmitApplication extends Application {
     public SQLiteDatabase getDatabase() {
         return database;
     }
+
+    @Override
+    public void onTerminate() {
+        database.close();
+    }
 }

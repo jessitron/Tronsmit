@@ -38,7 +38,7 @@ public class TronsmitActivity extends Activity {
     private static final int REQUEST_CODE_CHOOSE_INTENT = 2;
     private static final int REQUEST_CODE_TAKE_PICTURE = 3;
     private static final int REQUEST_CODE_PICK_IMAGE = 4;
-    static final String LOG_PREFIX = "TronsmitActivity";
+    public static final String LOG_PREFIX = "TronsmitActivity";
     public static final int PACKAGE_MANAGER_GET_INFO_FLAGS = PackageManager.GET_ACTIVITIES
             | PackageManager.GET_INTENT_FILTERS
             | PackageManager.GET_CONFIGURATIONS
@@ -56,6 +56,7 @@ public class TronsmitActivity extends Activity {
     };
     private Destination destination;
     private SendIntentCreator sendIntentCreator;
+    private com.jessitron.tronsmit.database.Button.Helper buttonHelper;
 
     /**
      * Called when the activity is first created.
@@ -77,6 +78,7 @@ public class TronsmitActivity extends Activity {
         }
 
         sendIntentCreator = new SendIntentCreator(getString(R.string.attribution), pictureManager);
+        buttonHelper = new com.jessitron.tronsmit.database.Button.Helper((TronsmitApplication) getApplicationContext());
     }
 
     @Override
@@ -243,7 +245,7 @@ public class TronsmitActivity extends Activity {
     }
 
     private void addToSavedButtonConfiguration(ComponentName component) {
-       // getPreferences(MODE_PRIVATE).edit().p
+        buttonHelper.store(component, destination);
     }
 
 

@@ -10,16 +10,16 @@ public class TronsmitOpenHelper extends SQLiteOpenHelper {
     private static final int VERSION = 1;
 
     public TronsmitOpenHelper(Context context) {
-        super(context, DATABASE_NAME, null, 1);
+        super(context, DATABASE_NAME, null, VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        throw new UnsupportedOperationException();
+        Button.onCreate(sqLiteDatabase);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        throw new UnsupportedOperationException();
+        // nada
     }
 }

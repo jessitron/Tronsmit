@@ -4,6 +4,10 @@ Stories:
    ) with gesture
    ) with confirmation
 
+) designate in UI when a button has been used to send the current picture
+
+) on resume, refresh the picture manager if we haven't moved away from the current newest.
+
 X) Explore queryActivities. what is available for sending?
 
 2) Make the button "pick contact" until you pick one
