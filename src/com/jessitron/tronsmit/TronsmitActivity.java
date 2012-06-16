@@ -207,7 +207,7 @@ public class TronsmitActivity extends Activity {
             say("Bad news: action button unknown");
             return;
         }
-        chooseActionButton.setOnClickListener(new StartActivityLike(this, sendIntentCreator, data, destination));
+        chooseActionButton.setOnClickListener(new StartActivityLike(this, sendIntentCreator, data.getComponent(), destination));
 
         ActivityInfo info = data.resolveActivityInfo(getPackageManager(), 0);
         chooseActionButton.setText("Send to " + destination.getName() + " by " + info.loadLabel(getPackageManager()));
@@ -220,24 +220,24 @@ public class TronsmitActivity extends Activity {
     private static class StartActivityLike implements View.OnClickListener {
         private final Context c;
         private final SendIntentCreator sendIntentCreator;
-        private final Intent data;
+        private final ComponentName component;
         private final Destination destination;
 
-        private StartActivityLike(Context c, SendIntentCreator sendIntentCreator, Intent data, Destination destination) {
+        private StartActivityLike(Context c, SendIntentCreator sendIntentCreator, ComponentName component, Destination destination) {
             this.c = c;
             this.sendIntentCreator = sendIntentCreator;
-            this.data = data;
+            this.component = component;
             this.destination = destination;
         }
 
         @Override
         public void onClick(View view) {
-            startActivityLike(data, destination);
+            startActivityLike(destination, component);
         }
 
-        private void startActivityLike(final Intent data, final Destination destination) {
+        private void startActivityLike(final Destination destination, ComponentName dataComponent) {
             Intent send = sendIntentCreator.createSendIntent(destination);
-            send.setComponent(data.getComponent());
+            send.setComponent(dataComponent);
             c.startActivity(send);
         }
     }
