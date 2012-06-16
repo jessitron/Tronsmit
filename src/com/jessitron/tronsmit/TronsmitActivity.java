@@ -347,6 +347,7 @@ public class TronsmitActivity extends Activity {
 
     private void reset() {
         findButtonContainer().removeAllViews();
+        buttonHelper.deleteAll();
         pictureManager.reset();
     }
 

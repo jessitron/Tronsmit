@@ -74,6 +74,10 @@ public class Button {
             }
             return result;
         }
+
+        public void deleteAll() {
+            app.getDatabase().execSQL("delete from " + TABLE_NAME);
+        }
     }
 
     public static class ButtonConfig {
