@@ -8,6 +8,11 @@ Stories:
 
 ) on resume, refresh the picture manager if we haven't moved away from the current newest.
 
+) save button config
+   ) removing an individual button should remove it from the db
+   ) reset should delete all buttons
+   ) onCreate should create all buttons
+
 X) Explore queryActivities. what is available for sending?
 
 2) Make the button "pick contact" until you pick one

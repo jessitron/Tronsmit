@@ -1,5 +1,7 @@
 package com.jessitron.tronsmit;
 
+import static com.jessitron.tronsmit.database.Button.ButtonConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,6 +81,14 @@ public class TronsmitActivity extends Activity {
 
         sendIntentCreator = new SendIntentCreator(getString(R.string.attribution), pictureManager);
         buttonHelper = new com.jessitron.tronsmit.database.Button.Helper((TronsmitApplication) getApplicationContext());
+
+        createButtons();
+    }
+
+    private void createButtons() {
+        for (ButtonConfig buttonConfig : buttonHelper.getButtons()) {
+            // create a button
+        }
     }
 
     @Override
@@ -211,12 +221,17 @@ public class TronsmitActivity extends Activity {
         }
         chooseActionButton.setOnClickListener(new StartActivityLike(this, sendIntentCreator, data.getComponent(), destination));
 
-        ActivityInfo info = data.resolveActivityInfo(getPackageManager(), 0);
-        chooseActionButton.setText("Send to " + destination.getName() + " by " + info.loadLabel(getPackageManager()));
+        final CharSequence activityLabel = getLabel(data);
+        chooseActionButton.setText("Send to " + destination.getName() + " by " + activityLabel);
 
         chooseActionButton = null;
         addAbutton();
         addToSavedButtonConfiguration(data.getComponent());
+    }
+
+    private CharSequence getLabel(Intent data) {
+        ActivityInfo info = data.resolveActivityInfo(getPackageManager(), 0);
+        return info.loadLabel(getPackageManager());
     }
 
     private static class StartActivityLike implements View.OnClickListener {
@@ -487,7 +502,7 @@ public class TronsmitActivity extends Activity {
         contactDescription.invalidate();
     }
 
-    private void addAbutton() {
+    private Button addAbutton() {
         final LinearLayout buttonContainer = findButtonContainer();
         final Button newButton = new Button(this);
         newButton.setText(R.string.chooseAction);
@@ -499,6 +514,7 @@ public class TronsmitActivity extends Activity {
         });
         newButton.setOnLongClickListener(BUTTON_DELETING_LISTENER);
         buttonContainer.addView(newButton);
+        return newButton;
     }
 
     private void loadGestures() {

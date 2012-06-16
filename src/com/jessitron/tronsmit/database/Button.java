@@ -1,12 +1,17 @@
 package com.jessitron.tronsmit.database;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jessitron.tronsmit.Destination;
 import com.jessitron.tronsmit.TronsmitActivity;
 import com.jessitron.tronsmit.TronsmitApplication;
 
 import android.content.ComponentName;
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.util.Log;
 
 public class Button {
@@ -54,6 +59,36 @@ public class Button {
             return id;
         }
 
+        public Iterable<ButtonConfig> getButtons() {
+
+            final Cursor cursor = app.getDatabase().query(TABLE_NAME, new String[]{ID, COMPONENT_PACKAGE, COMPONENT_CLASS, CONTACT_URI}, null, null, null, null, ID);
+
+            List<ButtonConfig> result = new ArrayList<ButtonConfig>(cursor.getCount());
+            while(!cursor.isAfterLast()) {
+                ComponentName component = new ComponentName(cursor.getString(1), cursor.getString(2));
+                Destination destination = new Destination(app.getContentResolver(), Uri.parse(cursor.getString(3)));
+                result.add(new ButtonConfig(component, destination));
+            }
+            return result;
+        }
+    }
+
+    public static class ButtonConfig {
+        public final ComponentName component;
+        public final Destination destination;
+
+        public ButtonConfig(ComponentName component, Destination destination) {
+            this.component = component;
+            this.destination = destination;
+        }
+
+        public ComponentName getComponent() {
+            return component;
+        }
+
+        public Destination getDestination() {
+            return destination;
+        }
     }
 
 }
