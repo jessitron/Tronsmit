@@ -1,1 +1,0 @@
-1) add read contacts permission to the manifest

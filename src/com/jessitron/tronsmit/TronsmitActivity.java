@@ -12,7 +12,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.gesture.Gesture;
 import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
@@ -38,17 +37,13 @@ public class TronsmitActivity extends Activity {
     private static final int REQUEST_CODE_CHOOSE_INTENT = 2;
     private static final int REQUEST_CODE_TAKE_PICTURE = 3;
     private static final int REQUEST_CODE_PICK_IMAGE = 4;
-    private static final String LOG_PREFIX = "TronsmitActivity";
+    static final String LOG_PREFIX = "TronsmitActivity";
     public static final int PACKAGE_MANAGER_GET_INFO_FLAGS = PackageManager.GET_ACTIVITIES
             | PackageManager.GET_INTENT_FILTERS
             | PackageManager.GET_CONFIGURATIONS
             | PackageManager.GET_META_DATA;
 
     private PictureManager pictureManager;
-
-    private String phoneNumber;
-    private String email;
-    private String name;
 
     private Button chooseActionButton;
     private static final View.OnLongClickListener BUTTON_DELETING_LISTENER = new View.OnLongClickListener() {
@@ -58,6 +53,7 @@ public class TronsmitActivity extends Activity {
             return true;
         }
     };
+    private Destination destination;
 
     /**
      * Called when the activity is first created.
@@ -113,21 +109,21 @@ public class TronsmitActivity extends Activity {
     }
 
 
-    private Intent createSendIntent() {
+    private Intent createSendIntent(Destination destination) {
 
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType(pictureManager.getImageType());
         shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
 
-        if (phoneNumber != null) {
-            shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, phoneNumber);
-            shareIntent.putExtra("address", phoneNumber);
+        if (destination.getPhoneNumber() != null) {
+            shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, destination.getPhoneNumber());
+            shareIntent.putExtra("address", destination.getPhoneNumber());
         }
         shareIntent.putExtra("sms_body", getString(R.string.attribution));
         shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.attribution));
 
-        if (email != null) {
-            shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+        if (destination.getEmail() != null) {
+            shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{destination.getEmail()});
         }
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.attribution));
 
@@ -135,7 +131,7 @@ public class TronsmitActivity extends Activity {
     }
 
     public void tronsmit(View v) {
-        Intent shareIntent = createSendIntent();
+        Intent shareIntent = createSendIntent(destination);
 
         startActivity(shareIntent);
     }
@@ -157,7 +153,7 @@ public class TronsmitActivity extends Activity {
 
         final Intent pickActivityIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
         pickActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        pickActivityIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent());
+        pickActivityIntent.putExtra(Intent.EXTRA_INTENT, createSendIntent(destination));
         pickActivityIntent.putExtra(Intent.EXTRA_TITLE, "what should this button do?");
 
         startActivityForResult(pickActivityIntent, REQUEST_CODE_CHOOSE_INTENT);
@@ -212,7 +208,7 @@ public class TronsmitActivity extends Activity {
     }
 
     private void startActivityLike(final Intent data) {
-        Intent send = createSendIntent();
+        Intent send = createSendIntent(destination);
         send.setComponent(data.getComponent());
         startActivity(send);
     }
@@ -225,6 +221,7 @@ public class TronsmitActivity extends Activity {
     private void pickArbitraryImage() {
         Intent pickIntent = new Intent(Intent.ACTION_PICK);
         pickIntent.setType("image/*");
+        final ResolveInfo resolveInfo = getPackageManager().resolveActivity(pickIntent, PackageManager.MATCH_DEFAULT_ONLY);
         startActivityForResult(pickIntent, REQUEST_CODE_PICK_IMAGE);
 
     }
@@ -247,75 +244,16 @@ public class TronsmitActivity extends Activity {
     }
 
     private void dial() {
-        Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
+        Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + destination.getPhoneNumber()));
         dialIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(dialIntent);
     }
 
     private void gotAContact(android.net.Uri uri) {
 
-        long contactId = loadNameAndId(uri);
-
-        loadPhoneNumber(contactId);
-
-        loadEmail(contactId);
+        destination = new Destination(getContentResolver(), uri);
 
         updateContactDescription();
-    }
-
-    private long loadNameAndId(Uri uri) {
-        long contactId = -1;
-        name = "Nobody";
-        Cursor cursor = getContentResolver().query(uri,
-                new String[]{ContactsContract.Contacts._ID,
-                        ContactsContract.Contacts.DISPLAY_NAME},
-                null, null, null);
-        try {
-            if (cursor.moveToFirst()) {
-                contactId = cursor.getLong(0);
-                name = cursor.getString(1);
-            } else {
-                say("Contact not found");
-            }
-        } finally {
-            cursor.close();
-        }
-        say("contactId is " + contactId);
-        return contactId;
-    }
-
-    private void loadEmail(long contactId) {
-        email = null;
-        Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI,
-                new String[]{ContactsContract.CommonDataKinds.Email.DATA1},
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactId, null, ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY + " DESC");
-        try {
-            if (cursor.moveToFirst()) {
-                email = cursor.getString(0);
-                say("Chose email: " + email);
-            } else {
-                say("Email not found");
-            }
-        } finally {
-            cursor.close();
-        }
-    }
-
-    private void loadPhoneNumber(long contactId) {
-        phoneNumber = null;
-        Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactId, null, ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY + " DESC");
-        try {
-            if (cursor.moveToFirst()) {
-                phoneNumber = cursor.getString(0);
-                say("Chose phone number: " + phoneNumber);
-            } else {
-                say("Phone number not found");
-            }
-        } finally {
-            cursor.close();
-        }
     }
 
 
@@ -364,16 +302,6 @@ public class TronsmitActivity extends Activity {
         return (LinearLayout) findViewById(R.id.buttonContainer);
     }
 
-    public void sendPictureHtc(View v) {
-        Intent shareIntent = new Intent("android.intent.action.SEND_MSG");
-        shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
-        shareIntent.putExtra("address", phoneNumber);
-        shareIntent.putExtra("sms_body", "sent by Transmit");
-        shareIntent.setType(pictureManager.getImageType());
-
-        startActivity(shareIntent);
-    }
-
     private void say(String s) {
         Log.d(LOG_PREFIX, "JessiTRON! " + s);
     }
@@ -383,7 +311,7 @@ public class TronsmitActivity extends Activity {
     }
 
     private void printStuff() {
-        List<ResolveInfo> result = getPackageManager().queryIntentActivityOptions(null, null, createSendIntent(),
+        List<ResolveInfo> result = getPackageManager().queryIntentActivityOptions(null, null, createSendIntent(destination),
                 PackageManager.MATCH_DEFAULT_ONLY | PACKAGE_MANAGER_GET_INFO_FLAGS | PackageManager.GET_RESOLVED_FILTER);
 
         say("Activities available for send: -----------------------  ");
@@ -521,7 +449,7 @@ public class TronsmitActivity extends Activity {
 
     private void updateContactDescription() {
         TextView contactDescription = (TextView) findViewById(R.id.contactName);
-        contactDescription.setText(name);
+        contactDescription.setText(destination.getName());
         contactDescription.invalidate();
     }
 
