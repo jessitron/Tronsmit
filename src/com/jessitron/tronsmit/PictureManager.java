@@ -13,7 +13,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-public class PictureManager {
+public class PictureManager implements PictureKnowerAbouter {
 
     private static final String LOG_PREFIX = "JessiTRON";
     public static final String[] SELECTED_COLUMNS = new String[]{MediaStore.Images.ImageColumns._ID,    // 0

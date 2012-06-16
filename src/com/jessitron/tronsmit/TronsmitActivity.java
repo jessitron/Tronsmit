@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -54,6 +55,7 @@ public class TronsmitActivity extends Activity {
         }
     };
     private Destination destination;
+    private SendIntentCreator sendIntentCreator;
 
     /**
      * Called when the activity is first created.
@@ -73,6 +75,8 @@ public class TronsmitActivity extends Activity {
             disableAllButtons();
             toast("This app is useless without pictures");
         }
+
+        sendIntentCreator = new SendIntentCreator(getString(R.string.attribution), pictureManager);
     }
 
     @Override
@@ -111,23 +115,38 @@ public class TronsmitActivity extends Activity {
 
     private Intent createSendIntent(Destination destination) {
 
+        return sendIntentCreator.createSendIntent(destination);
+    }
+
+    private static class SendIntentCreator {
+
+        private final PictureKnowerAbouter picInfo;
+        private final CharSequence attributionString;
+
+        private SendIntentCreator(CharSequence attributionString, PictureKnowerAbouter picInfo) {
+            this.picInfo = picInfo;
+            this.attributionString = attributionString;
+        }
+
+        private  Intent createSendIntent(Destination destination) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType(pictureManager.getImageType());
-        shareIntent.putExtra(Intent.EXTRA_STREAM, pictureManager.getImageLocation());
+        shareIntent.setType(picInfo.getImageType());
+        shareIntent.putExtra(Intent.EXTRA_STREAM, picInfo.getImageLocation());
 
         if (destination.getPhoneNumber() != null) {
             shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, destination.getPhoneNumber());
             shareIntent.putExtra("address", destination.getPhoneNumber());
         }
-        shareIntent.putExtra("sms_body", getString(R.string.attribution));
-        shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.attribution));
+        shareIntent.putExtra("sms_body", attributionString);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, attributionString);
 
         if (destination.getEmail() != null) {
             shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{destination.getEmail()});
         }
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.attribution));
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, attributionString);
 
         return shareIntent;
+    }
     }
 
     public void tronsmit(View v) {
@@ -188,29 +207,43 @@ public class TronsmitActivity extends Activity {
             say("Bad news: action button unknown");
             return;
         }
-        chooseActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivityLike(data);
-            }
-        });
+        chooseActionButton.setOnClickListener(new StartActivityLike(this, sendIntentCreator, data, destination));
 
         ActivityInfo info = data.resolveActivityInfo(getPackageManager(), 0);
-        chooseActionButton.setText("Send to " + info.loadLabel(getPackageManager()));
+        chooseActionButton.setText("Send to " + destination.getName() + " by " + info.loadLabel(getPackageManager()));
 
         chooseActionButton = null;
         addAbutton();
         addToSavedButtonConfiguration(data.getComponent());
     }
 
-    private void addToSavedButtonConfiguration(ComponentName component) {
-       // getPreferences(MODE_PRIVATE).edit().p
+    private static class StartActivityLike implements View.OnClickListener {
+        private final Context c;
+        private final SendIntentCreator sendIntentCreator;
+        private final Intent data;
+        private final Destination destination;
+
+        private StartActivityLike(Context c, SendIntentCreator sendIntentCreator, Intent data, Destination destination) {
+            this.c = c;
+            this.sendIntentCreator = sendIntentCreator;
+            this.data = data;
+            this.destination = destination;
+        }
+
+        @Override
+        public void onClick(View view) {
+            startActivityLike(data, destination);
+        }
+
+        private void startActivityLike(final Intent data, final Destination destination) {
+            Intent send = sendIntentCreator.createSendIntent(destination);
+            send.setComponent(data.getComponent());
+            c.startActivity(send);
+        }
     }
 
-    private void startActivityLike(final Intent data) {
-        Intent send = createSendIntent(destination);
-        send.setComponent(data.getComponent());
-        startActivity(send);
+    private void addToSavedButtonConfiguration(ComponentName component) {
+       // getPreferences(MODE_PRIVATE).edit().p
     }
 
 
@@ -223,7 +256,6 @@ public class TronsmitActivity extends Activity {
         pickIntent.setType("image/*");
         final ResolveInfo resolveInfo = getPackageManager().resolveActivity(pickIntent, PackageManager.MATCH_DEFAULT_ONLY);
         startActivityForResult(pickIntent, REQUEST_CODE_PICK_IMAGE);
-
     }
 
     private void takePicture() {

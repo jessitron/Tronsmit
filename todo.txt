@@ -1,5 +1,9 @@
 Stories:
 
+) delete picture
+   ) with gesture
+   ) with confirmation
+
 X) Explore queryActivities. what is available for sending?
 
 2) Make the button "pick contact" until you pick one
