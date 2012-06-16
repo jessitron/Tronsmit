@@ -48,14 +48,12 @@
                   android:background="#000000"
                   android:id="@+id/buttonContainer"
             >
-
-        <Button
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:onClick="chooseAction"
-                android:text="@string/chooseAction"/>
-
     </LinearLayout>
+    <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="chooseAction"
+            android:text="@string/chooseAction"/>
     <android.gesture.GestureOverlayView
             android:id="@+id/gestures"
             android:layout_width="fill_parent"

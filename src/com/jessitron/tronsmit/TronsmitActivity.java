@@ -48,7 +48,6 @@ public class TronsmitActivity extends Activity {
 
     private PictureManager pictureManager;
 
-    private Button chooseActionButton;
     private static final View.OnLongClickListener BUTTON_DELETING_LISTENER = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View view) {
@@ -87,8 +86,14 @@ public class TronsmitActivity extends Activity {
 
     private void createButtons() {
         for (ButtonConfig buttonConfig : buttonHelper.getButtons()) {
-            // create a button
+            addButtonFor(createIntentFrom(buttonConfig.component), buttonConfig.destination);
         }
+    }
+
+    private Intent createIntentFrom(ComponentName component) {
+        final Intent intent = new Intent();
+        intent.setComponent(component);
+        return intent;
     }
 
     @Override
@@ -180,7 +185,6 @@ public class TronsmitActivity extends Activity {
     }
 
     public void chooseAction(View v) {
-        chooseActionButton = (Button) v;
 
         final Intent pickActivityIntent = new Intent(Intent.ACTION_PICK_ACTIVITY);
         pickActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -201,7 +205,7 @@ public class TronsmitActivity extends Activity {
             savePreferences(data.getData());
 
         } else if (requestCode == REQUEST_CODE_CHOOSE_INTENT && resultCode == RESULT_OK) {
-            gotAnAction(data);
+            gotAnAction(data, destination);
         } else if (requestCode == REQUEST_CODE_TAKE_PICTURE && resultCode == RESULT_OK) {
             pictureManager.reset(); // find the new picture
         } else if (requestCode == REQUEST_CODE_PICK_IMAGE && resultCode == RESULT_OK) {
@@ -213,20 +217,21 @@ public class TronsmitActivity extends Activity {
         pictureManager.useThisOne(data);
     }
 
-    private void gotAnAction(final Intent data) {
+    private void gotAnAction(final Intent data, Destination destination) {
         // note: this might not be a default action. could be trouble.
-        if (chooseActionButton == null) {
-            say("Bad news: action button unknown");
-            return;
-        }
-        chooseActionButton.setOnClickListener(new StartActivityLike(this, sendIntentCreator, data.getComponent(), destination));
 
-        final CharSequence activityLabel = getLabel(data);
-        chooseActionButton.setText("Send to " + destination.getName() + " by " + activityLabel);
+        addButtonFor(data, destination);
 
-        chooseActionButton = null;
-        addAbutton();
         addToSavedButtonConfiguration(data.getComponent());
+    }
+
+    private void addButtonFor(Intent data, Destination destination) {
+        final Button newButton = new Button(this);
+        newButton.setOnClickListener(new StartActivityLike(this, sendIntentCreator, data.getComponent(), destination));
+        newButton.setText("Send to " + destination.getName() + " by " + getLabel(data));
+        newButton.setOnLongClickListener(BUTTON_DELETING_LISTENER);
+
+        findButtonContainer().addView(newButton);
     }
 
     private CharSequence getLabel(Intent data) {
@@ -342,7 +347,6 @@ public class TronsmitActivity extends Activity {
 
     private void reset() {
         findButtonContainer().removeAllViews();
-        addAbutton();
         pictureManager.reset();
     }
 
@@ -502,20 +506,7 @@ public class TronsmitActivity extends Activity {
         contactDescription.invalidate();
     }
 
-    private Button addAbutton() {
-        final LinearLayout buttonContainer = findButtonContainer();
-        final Button newButton = new Button(this);
-        newButton.setText(R.string.chooseAction);
-        newButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                chooseAction(view);
-            }
-        });
-        newButton.setOnLongClickListener(BUTTON_DELETING_LISTENER);
-        buttonContainer.addView(newButton);
-        return newButton;
-    }
+
 
     private void loadGestures() {
         final GestureLibrary gestureLibrary = GestureLibraries.fromRawResource(getApplicationContext(), getResources().getIdentifier("raw/gestures", null, getPackageName()));
