@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -145,25 +148,25 @@ public class TronsmitActivity extends Activity {
             this.attributionString = attributionString;
         }
 
-        private  Intent createSendIntent(Destination destination) {
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType(picInfo.getImageType());
-        shareIntent.putExtra(Intent.EXTRA_STREAM, picInfo.getImageLocation());
+        private Intent createSendIntent(Destination destination) {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType(picInfo.getImageType());
+            shareIntent.putExtra(Intent.EXTRA_STREAM, picInfo.getImageLocation());
 
-        if (destination.getPhoneNumber() != null) {
-            shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, destination.getPhoneNumber());
-            shareIntent.putExtra("address", destination.getPhoneNumber());
+            if (destination.getPhoneNumber() != null) {
+                shareIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, destination.getPhoneNumber());
+                shareIntent.putExtra("address", destination.getPhoneNumber());
+            }
+            shareIntent.putExtra("sms_body", attributionString);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, attributionString);
+
+            if (destination.getEmail() != null) {
+                shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{destination.getEmail()});
+            }
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, attributionString);
+
+            return shareIntent;
         }
-        shareIntent.putExtra("sms_body", attributionString);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, attributionString);
-
-        if (destination.getEmail() != null) {
-            shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{destination.getEmail()});
-        }
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, attributionString);
-
-        return shareIntent;
-    }
     }
 
     public void tronsmit(View v) {
@@ -349,7 +352,28 @@ public class TronsmitActivity extends Activity {
     }
 
     private void deletePicture() {
-        pictureManager.delete();
+        showDialog(0);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        return createConfirmationDialog("Delete this picture?", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                pictureManager.delete();
+            }
+        });
+    }
+
+    private AlertDialog createConfirmationDialog(String message, DialogInterface.OnClickListener yesAction) {
+        return new AlertDialog.Builder(this).setMessage(message)
+                .setPositiveButton("Yes", yesAction)
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                }).create();
     }
 
     private void resetButtons() {
@@ -409,8 +433,7 @@ public class TronsmitActivity extends Activity {
                         | PackageManager.GET_CONFIGURATIONS
                         | PackageManager.GET_META_DATA);
 
-        for (PackageInfo packageInfo :                installedPackages)
-        {
+        for (PackageInfo packageInfo : installedPackages) {
             say("Package info: " + packageInfo);
             say(packageInfo.packageName);
             if (packageInfo.activities != null) {
@@ -513,7 +536,6 @@ public class TronsmitActivity extends Activity {
         contactDescription.setText(destination.getName());
         contactDescription.invalidate();
     }
-
 
 
     private void loadGestures() {

@@ -5,4 +5,6 @@
     <string name="contactnamedesc">Tronsmit to:</string>
     <string name="attribution">sent by Tronsmit</string>
     <string name="chooseAction">Choose an action</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>
