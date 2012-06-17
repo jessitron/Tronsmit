@@ -1,8 +1,9 @@
 Stories:
 
 ) delete picture
-   ) with gesture
    ) with confirmation
+   ) with gesture
+   ) restore position in cursor
 
 ) designate in UI when a button has been used to send the current picture
 
@@ -10,8 +11,6 @@ Stories:
 
 ) save button config
    ) removing an individual button should remove it from the db
-   ) reset should delete all buttons
-   ) onCreate should create all buttons
 
 X) Explore queryActivities. what is available for sending?
 

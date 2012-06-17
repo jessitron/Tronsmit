@@ -329,8 +329,11 @@ public class TronsmitActivity extends Activity {
             case R.id.editpic:
                 editPicture();
                 return true;
+            case R.id.delete:
+                deletePicture();
+                return true;
             case R.id.reset:
-                reset();
+                resetButtons();
                 return true;
             case R.id.choosepic:
                 pickArbitraryImage();
@@ -345,7 +348,11 @@ public class TronsmitActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void reset() {
+    private void deletePicture() {
+        pictureManager.delete();
+    }
+
+    private void resetButtons() {
         findButtonContainer().removeAllViews();
         buttonHelper.deleteAll();
         pictureManager.reset();

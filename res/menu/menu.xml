@@ -3,9 +3,10 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/camera" android:title="Take a new picture"></item>
     <item android:id="@+id/choosepic" android:title="Choose a picture"></item>
+    <item android:id="@+id/delete" android:title="Delete"></item>
+    <item android:id="@+id/reset" android:title="Reset"></item>
     <item android:id="@+id/editpic" android:title="Edit picture"></item>
     <item android:id="@+id/printstuff" android:title="Log some stuff"></item>
-    <item android:id="@+id/reset" android:title="Reset"></item>
     <item android:id="@+id/flashy" android:title="Flash some lights"></item>
     <item android:id="@+id/dial" android:title="Dial"></item>
 </menu>

@@ -25,12 +25,13 @@ public class PictureManager implements PictureKnowerAbouter {
     };
     public static final int COL_IMAGE_TYPE = 4;
     public static final int COL_IMAGE_URI = 1;
+    public static final int COL_IMAGE_ID = 0;
     private Cursor cursor;
     private ImageView imageView;
     private final Context context;
     private Uri imageUri;
     private String imageType;
-
+    private long imageId;
 
     public PictureManager(ImageView imageView, Context context) {
         this.imageView = imageView;
@@ -118,6 +119,7 @@ public class PictureManager implements PictureKnowerAbouter {
         if (!cursor.isAfterLast()) {
             imageUri = Uri.parse("file://" + cursor.getString(COL_IMAGE_URI));
             imageType = cursor.getString(COL_IMAGE_TYPE);
+            imageId = cursor.getLong(COL_IMAGE_ID);
         }
     }
 
@@ -137,5 +139,10 @@ public class PictureManager implements PictureKnowerAbouter {
         imageUri = data;
         imageType = "image/jpeg"; // I'm cheating. If this isn't right it will fail
         putPicInView();
+    }
+
+    public void delete() {
+        context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.MediaColumns._ID + " = :id", new String[] { "" + imageId});
+        reset();
     }
 }
