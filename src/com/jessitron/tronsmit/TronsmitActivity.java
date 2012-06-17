@@ -527,14 +527,13 @@ public class TronsmitActivity extends Activity {
         String uriString = getPreferences(MODE_PRIVATE).getString("contactUri", "");
         if ("" != uriString) {
             gotAContact(Uri.parse(uriString));
+            updateContactDescription();
         }
-        updateContactDescription();
     }
 
     private void updateContactDescription() {
         TextView contactDescription = (TextView) findViewById(R.id.contactName);
         contactDescription.setText(destination.getName());
-        contactDescription.invalidate();
     }
 
 
