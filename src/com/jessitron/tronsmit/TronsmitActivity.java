@@ -351,18 +351,28 @@ public class TronsmitActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    private static final int DIALOG_DELETE_PICTURE = 1;
+
     private void deletePicture() {
-        showDialog(0);
+        showDialog(DIALOG_DELETE_PICTURE);
     }
 
     @Override
     protected Dialog onCreateDialog(int id) {
-        return createConfirmationDialog("Delete this picture?", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                pictureManager.delete();
-            }
-        });
+        switch (id) {
+            case DIALOG_DELETE_PICTURE:
+                return createConfirmationDialog("Delete this picture?", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        reallyDeletePicture();
+                    }
+                });
+        }
+        return super.onCreateDialog(id);
+    }
+
+    private void reallyDeletePicture() {
+        pictureManager.delete();
     }
 
     private AlertDialog createConfirmationDialog(String message, DialogInterface.OnClickListener yesAction) {
