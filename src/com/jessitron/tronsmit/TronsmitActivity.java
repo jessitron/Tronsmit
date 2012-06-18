@@ -23,6 +23,7 @@ import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.gesture.Prediction;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -232,9 +233,19 @@ public class TronsmitActivity extends Activity {
         final Button newButton = new Button(this);
         newButton.setOnClickListener(new StartActivityLike(this, sendIntentCreator, data.getComponent(), destination));
         newButton.setText("Send to " + destination.getName() + " by " + getLabel(data));
+        appearUnused(newButton);
         newButton.setOnLongClickListener(BUTTON_DELETING_LISTENER);
 
         findButtonContainer().addView(newButton);
+    }
+
+    // TODO: make the appearance not suck
+    private void appearUnused(Button newButton) {
+        newButton.setBackgroundColor(Color.BLUE);
+    }
+
+    private static void appearUsed(Button button) {
+        button.setBackgroundColor(Color.GREEN);
     }
 
     private CharSequence getLabel(Intent data) {
@@ -257,6 +268,7 @@ public class TronsmitActivity extends Activity {
 
         @Override
         public void onClick(View view) {
+            appearUsed((Button) view);
             startActivityLike(destination, component);
         }
 
@@ -266,6 +278,7 @@ public class TronsmitActivity extends Activity {
             c.startActivity(send);
         }
     }
+
 
     private void addToSavedButtonConfiguration(ComponentName component) {
         buttonHelper.store(component, destination);
@@ -547,6 +560,12 @@ public class TronsmitActivity extends Activity {
     }
 
 
+    public void resetButtonColors() {
+        for (int i = 0; i < findButtonContainer().getChildCount(); i++) {
+            appearUnused((Button) findButtonContainer().getChildAt(i));
+        }
+    }
+
     private void loadGestures() {
         final GestureLibrary gestureLibrary = GestureLibraries.fromRawResource(getApplicationContext(), getResources().getIdentifier("raw/gestures", null, getPackageName()));
         if (!gestureLibrary.load()) {
@@ -563,8 +582,10 @@ public class TronsmitActivity extends Activity {
                     Prediction prediction = predictions.get(0);
                     if (prediction.score > 1.0) {
                         if ("older".equals(prediction.name)) {
+                            resetButtonColors();
                             pictureManager.older();
                         } else if ("newer".equals(prediction.name)) {
+                            resetButtonColors();
                             pictureManager.newer();
                         } else if ("tronsmit".equals(prediction.name)) {
                             tronsmit(null);

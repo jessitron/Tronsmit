@@ -23,23 +23,28 @@
                       android:paddingLeft="4dp"
                       android:paddingRight="4dp"
                 >
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/contactnamedesc"
-                />
-        <TextView
-                android:id="@+id/contactName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nobody"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/contactnamedesc"
+                    />
+            <TextView
+                    android:id="@+id/contactName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nobody"/>
         </LinearLayout>
         <Button
                 android:id="@+id/pickContact"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="pickContact"
                 android:text="Pick Contact"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="chooseAction"
+                android:text="@string/chooseAction"/>
     </LinearLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
@@ -49,22 +54,18 @@
                   android:id="@+id/buttonContainer"
             >
     </LinearLayout>
-    <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:onClick="chooseAction"
-            android:text="@string/chooseAction"/>
+
     <android.gesture.GestureOverlayView
             android:id="@+id/gestures"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1.0" >
-    <ImageView
-            android:id="@+id/pictureView"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="#FF9900"
-            android:contentDescription="recent photo"/>
+            android:layout_weight="1.0">
+        <ImageView
+                android:id="@+id/pictureView"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#FF9900"
+                android:contentDescription="recent photo"/>
     </android.gesture.GestureOverlayView>
 
 
