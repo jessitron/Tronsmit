@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -49,6 +50,7 @@ public class TronsmitActivity extends Activity {
             | PackageManager.GET_INTENT_FILTERS
             | PackageManager.GET_CONFIGURATIONS
             | PackageManager.GET_META_DATA;
+    public static final LinearLayout.LayoutParams FILL_WIDTH = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
     private PictureManager pictureManager;
 
@@ -62,6 +64,7 @@ public class TronsmitActivity extends Activity {
     private Destination destination;
     private SendIntentCreator sendIntentCreator;
     private com.jessitron.tronsmit.database.Button.Helper buttonHelper;
+    private Uri pictureStorage;
 
     /**
      * Called when the activity is first created.
@@ -89,6 +92,7 @@ public class TronsmitActivity extends Activity {
     }
 
     private void createButtons() {
+        findButtonContainer().removeAllViews();
         for (ButtonConfig buttonConfig : buttonHelper.getButtons()) {
             addButtonFor(createIntentFrom(buttonConfig.component), buttonConfig.destination);
         }
@@ -233,19 +237,27 @@ public class TronsmitActivity extends Activity {
         final Button newButton = new Button(this);
         newButton.setOnClickListener(new StartActivityLike(this, sendIntentCreator, data.getComponent(), destination));
         newButton.setText("Send to " + destination.getName() + " by " + getLabel(data));
+        newButton.setLayoutParams(FILL_WIDTH);
         appearUnused(newButton);
         newButton.setOnLongClickListener(BUTTON_DELETING_LISTENER);
+        putButtonOnScreen(newButton);
+    }
 
-        findButtonContainer().addView(newButton);
+    private void putButtonOnScreen(Button newButton) {
+        final LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.addView(newButton);
+        linearLayout.setLayoutParams(FILL_WIDTH);
+        linearLayout.setPadding(4,4,4,4);
+        findButtonContainer().addView(linearLayout);
     }
 
     // TODO: make the appearance not suck
     private void appearUnused(Button newButton) {
-        newButton.setBackgroundColor(Color.BLUE);
+        newButton.setBackgroundColor(Color.rgb(0x59, 0xaa, 0xff));
     }
 
     private static void appearUsed(Button button) {
-        button.setBackgroundColor(Color.GREEN);
+        button.setBackgroundColor(Color.rgb(0xa4, 0xff, 0x73));
     }
 
     private CharSequence getLabel(Intent data) {
@@ -297,7 +309,14 @@ public class TronsmitActivity extends Activity {
     }
 
     private void takePicture() {
+        String fileName = "tronsmit.jpg";
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, fileName);
+        Uri mCapturedImageURI = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
         Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI);
+        pictureStorage = mCapturedImageURI;
         startActivityForResult(pictureIntent, REQUEST_CODE_TAKE_PICTURE);
     }
 
@@ -561,8 +580,9 @@ public class TronsmitActivity extends Activity {
 
 
     public void resetButtonColors() {
-        for (int i = 0; i < findButtonContainer().getChildCount(); i++) {
-            appearUnused((Button) findButtonContainer().getChildAt(i));
+        final LinearLayout buttonContainer = findButtonContainer();
+        for (int i = 0; i < buttonContainer.getChildCount(); i++) {
+            appearUnused((Button) ((LinearLayout) buttonContainer.getChildAt(i)).getChildAt(0)); // each button is within a LinearLayout
         }
     }
 

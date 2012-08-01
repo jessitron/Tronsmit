@@ -53,6 +53,24 @@
                   android:background="#000000"
                   android:id="@+id/buttonContainer"
             >
+        <LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+                       android:orientation="vertical"
+                       android:layout_width="fill_parent"
+                       android:layout_height="wrap_content"
+                       android:padding="4px"
+                       android:background="#000000">
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="chooseAction"
+                android:text="@string/chooseAction"
+                android:background="#0000ff"/></LinearLayout>
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="chooseAction"
+                android:text="@string/chooseAction"
+                android:background="#0000ff"/>
     </LinearLayout>
 
     <android.gesture.GestureOverlayView

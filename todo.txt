@@ -1,11 +1,9 @@
 Stories:
 
 ) delete picture
-   ) with confirmation
+   x) with confirmation
    ) with gesture
    ) restore position in cursor
-
-) designate in UI when a button has been used to send the current picture
 
 ) on resume, refresh the picture manager if we haven't moved away from the current newest.
 
@@ -31,6 +29,8 @@ X) gesture to move to previous picture
 bug: make it skip past 3D photos (test)
 
 ) in my chooser I might hit something that is not a default.
+
+) add location: get current location, show it in a map, and then attach it to the send and get Twitter to handle it.
 
 Silly stuff that would be fun:
 - default the phone number to the one most frequently texted (or texted pictures)

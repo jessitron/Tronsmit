@@ -145,4 +145,17 @@ public class PictureManager implements PictureKnowerAbouter {
         context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.MediaColumns._ID + " = :id", new String[] { "" + imageId});
         reset();
     }
+
+//    public void printStuffAbout(Uri pictureUri) {
+//        // http://stackoverflow.com/questions/4184951/get-path-of-image-from-action-image-capture-intent
+//        String[] projection = { MediaStore.Images.Media.DATA};
+//        Cursor cursor = context.getContentResolver().query(pictureUri, projection, null, null, null);
+//        int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+//        cursor.moveToFirst();
+//        String capturedImageFilePath = cursor.getString(column_index_data);
+//
+//        Log.d("JessiTRON", "image captured at: " + capturedImageFilePath);
+//        cursor.close();
+//        Toast.makeText(context, "Image stored at " + capturedImageFilePath, Toast.LENGTH_LONG);
+//    }
 }
