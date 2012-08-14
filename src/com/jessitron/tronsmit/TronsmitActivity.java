@@ -64,7 +64,6 @@ public class TronsmitActivity extends Activity {
     private Destination destination;
     private SendIntentCreator sendIntentCreator;
     private com.jessitron.tronsmit.database.Button.Helper buttonHelper;
-    private Uri pictureStorage;
 
     /**
      * Called when the activity is first created.
@@ -309,14 +308,13 @@ public class TronsmitActivity extends Activity {
     }
 
     private void takePicture() {
-        String fileName = "tronsmit.jpg";
         ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, fileName);
-        Uri mCapturedImageURI = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        values.put(MediaStore.Images.Media.TITLE, "tronsmit.jpg");
+        Uri mCapturedImageURI = getContentResolver()
+                .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
         Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI);
-        pictureStorage = mCapturedImageURI;
         startActivityForResult(pictureIntent, REQUEST_CODE_TAKE_PICTURE);
     }
 
