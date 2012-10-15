@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tronsmit</string>
-    <string name="forwardmms">HTC Messages</string>
     <string name="contactnamedesc">Tronsmit to:</string>
     <string name="attribution">sent by Tronsmit</string>
     <string name="chooseAction">Choose an action</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="confirmDeletion">Delete this picture?</string>
 </resources>
