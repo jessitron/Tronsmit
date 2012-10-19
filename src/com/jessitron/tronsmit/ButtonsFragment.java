@@ -44,12 +44,35 @@ public class ButtonsFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         loadPreferences();
-
         buttonHelper = new com.jessitron.tronsmit.database.Button.Helper( getApplicationContext());
-
         createButtons();
-
         super.onActivityCreated(savedInstanceState);
+    }
+
+    public void pickContact(View v) {
+        final Intent pickContactsIntent =
+                new Intent(
+                        Intent.ACTION_PICK,
+                        ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(
+                pickContactsIntent,
+                REQUEST_CODE_PICK_CONTACT);
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode,
+                                 int resultCode,
+                                 final Intent data) {
+
+        if (requestCode == REQUEST_CODE_PICK_CONTACT
+                && resultCode == Activity.RESULT_OK) {
+            gotAContact(data.getData());
+            savePreferences(data.getData());
+
+        } else if (requestCode == REQUEST_CODE_CHOOSE_INTENT && resultCode == Activity.RESULT_OK) {
+            gotAnAction(data, destination);
+        }  else super.onActivityResult(requestCode, resultCode, data);
     }
 
     public TronsmitApplication getApplicationContext() {
@@ -64,18 +87,6 @@ public class ButtonsFragment extends Fragment {
         for (Button.ButtonConfig buttonConfig : buttonHelper.getButtons()) {
             addButtonFor(createIntentFrom(buttonConfig.component), buttonConfig.destination);
         }
-    }
-
-    public void pickContact(View v) {
-
-        final Intent pickContactsIntent =
-                new Intent(
-                        Intent.ACTION_PICK,
-                        ContactsContract.Contacts.CONTENT_URI);
-        startActivityForResult(
-                pickContactsIntent,
-                REQUEST_CODE_PICK_CONTACT);
-
     }
 
     public void resetButtons() {
@@ -98,6 +109,12 @@ public class ButtonsFragment extends Fragment {
             updateContactDescription();
         }
     }
+
+    private void gotAContact(android.net.Uri uri) {
+        destination = new Destination(getApplicationContext().getContentResolver(), uri);
+        updateContactDescription();
+    }
+
     private void updateContactDescription() {
         TextView contactDescription = (TextView) getView().findViewById(R.id.contactName);
         contactDescription.setText(destination.getName());
@@ -159,20 +176,7 @@ public class ButtonsFragment extends Fragment {
         addToSavedButtonConfiguration(data.getComponent());
     }
 
-    @Override
-    public void onActivityResult(int requestCode,
-                                    int resultCode,
-                                    final Intent data) {
 
-        if (requestCode == REQUEST_CODE_PICK_CONTACT
-                && resultCode == Activity.RESULT_OK) {
-            gotAContact(data.getData());
-            savePreferences(data.getData());
-
-        } else if (requestCode == REQUEST_CODE_CHOOSE_INTENT && resultCode == Activity.RESULT_OK) {
-            gotAnAction(data, destination);
-        }  else super.onActivityResult(requestCode, resultCode, data);
-    }
 
     // TODO: make the appearance not suck
     private void appearUnused(android.widget.Button newButton) {
@@ -188,11 +192,7 @@ public class ButtonsFragment extends Fragment {
         return info.loadLabel(getApplicationContext().getPackageManager());
     }
 
-    private void gotAContact(android.net.Uri uri) {
-        destination = new Destination(getApplicationContext().getContentResolver(), uri);
 
-        updateContactDescription();
-    }
 
     public Destination getDestination() {
         return destination;

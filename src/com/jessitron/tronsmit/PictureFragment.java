@@ -16,21 +16,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class PictureViewFragment extends Fragment {
+public class PictureFragment extends Fragment {
     private static final int REQUEST_CODE_PICK_IMAGE = 4;
-    private static final int REQUEST_CODE_TAKE_PICTURE = 3;
 
     private PictureManager pictureManager;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-
-
-
-        // do we need to do anything here?
-    }
 
     public PictureManager getPictureManager() {
         return pictureManager; //TODO: eliminate
@@ -38,13 +27,7 @@ public class PictureViewFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        View v = inflater.inflate(R.layout.picture_fragment, container, false)   ;
-
-
-
-        return v;
-
+        return inflater.inflate(R.layout.picture_fragment, container, false);
     }
 
     @Override
@@ -60,28 +43,53 @@ public class PictureViewFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
     }
 
+    @Override
+    public void onDestroy() {
+        pictureManager.shutDown();
+        super.onDestroy();
+    }
+
     private TronsmitActivity getTronsmit() {
         return (TronsmitActivity) getActivity();
     }
 
-    public PictureKnowerAbouter getPicInfo() {
-        final String imageType = pictureManager.getImageType();
-        final Uri imageLocation = pictureManager.getImageLocation();
-        return new PictureKnowerAbouter() {
-            @Override
-            public String getImageType() {
-                return  imageType;
-            }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.delete:
+                deletePicture();
+                return true;
+            case R.id.choosepic:
+                pickArbitraryImage();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
-            @Override
-            public Uri getImageLocation() {
-                return imageLocation;
-            }
-        }   ;
+
+    @Override
+    public void onActivityResult(int requestCode,
+                                    int resultCode,
+                                    final Intent data) {
+        if (requestCode == REQUEST_CODE_PICK_IMAGE && resultCode == Activity.RESULT_OK) {
+            gotAnImage(data.getData());
+        } else super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void pickArbitraryImage() {
+        Intent pickIntent = new Intent(Intent.ACTION_PICK);
+        pickIntent.setType("image/*");
+        // final ResolveInfo resolveInfo = getPackageManager().resolveActivity(pickIntent, PackageManager.MATCH_DEFAULT_ONLY);
+        startActivityForResult(pickIntent, REQUEST_CODE_PICK_IMAGE);
+    }
+
+    private void gotAnImage(Uri data) {
+        pictureManager.useThisOne(data);
     }
 
     private void loadGestures() {
-        final GestureLibrary gestureLibrary = GestureLibraries.fromRawResource(getActivity().getApplicationContext(), getResources().getIdentifier("raw/gestures", null, getActivity().getPackageName()));
+        final GestureLibrary gestureLibrary = GestureLibraries.fromRawResource(getActivity().getApplicationContext(),
+                getResources().getIdentifier("raw/gestures", null, getActivity().getPackageName()));
         if (!gestureLibrary.load()) {
             toast("Warning: unable to load gestures");
             return;
@@ -110,59 +118,28 @@ public class PictureViewFragment extends Fragment {
         });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.delete:
-                deletePicture();
-                return true;
-            case R.id.choosepic:
-                pickArbitraryImage();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+    public PictureKnowerAbouter getPicInfo() {
+        final String imageType = pictureManager.getImageType();
+        final Uri imageLocation = pictureManager.getImageLocation();
+        return new PictureKnowerAbouter() {
+            @Override
+            public String getImageType() {
+                return  imageType;
+            }
 
-
-    @Override
-    public void onActivityResult(int requestCode,
-                                    int resultCode,
-                                    final Intent data) {
-
-        if (requestCode == REQUEST_CODE_PICK_IMAGE && resultCode == Activity.RESULT_OK) {
-            gotAnImage(data.getData());
-        } else super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void pickArbitraryImage() {
-        Intent pickIntent = new Intent(Intent.ACTION_PICK);
-        pickIntent.setType("image/*");
-        // final ResolveInfo resolveInfo = getPackageManager().resolveActivity(pickIntent, PackageManager.MATCH_DEFAULT_ONLY);
-        startActivityForResult(pickIntent, REQUEST_CODE_PICK_IMAGE);
-    }
-
-    private void gotAnImage(Uri data) {
-        pictureManager.useThisOne(data);
+            @Override
+            public Uri getImageLocation() {
+                return imageLocation;
+            }
+        }   ;
     }
 
     private void toast(String text) {
         Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
     }
 
-    private void takePicture() {
-        Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(pictureIntent, REQUEST_CODE_TAKE_PICTURE);
-    }
-
     private void deletePicture() {
         new DeleteConfirmation().show(getFragmentManager(), "dialog");
-    }
-
-    @Override
-    public void onDestroy() {
-
-        pictureManager.shutDown();
-        super.onDestroy();
     }
 
     public void deleteCurrentPicture() {

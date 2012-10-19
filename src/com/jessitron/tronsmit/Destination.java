@@ -60,7 +60,8 @@ public class Destination {
         email = null;
         Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI,
                 new String[]{ContactsContract.CommonDataKinds.Email.DATA1},
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactId, null, ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY + " DESC");
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactId, null,
+                ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY + " DESC");
         try {
             if (cursor.moveToFirst()) {
                 email = cursor.getString(0);
@@ -77,7 +78,8 @@ public class Destination {
         phoneNumber = null;
         Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactId, null, ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY + " DESC");
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactId, null,
+                ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY + " DESC");
         try {
             if (cursor.moveToFirst()) {
                 phoneNumber = cursor.getString(0);

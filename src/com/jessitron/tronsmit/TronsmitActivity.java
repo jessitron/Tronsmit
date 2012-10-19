@@ -22,7 +22,7 @@ public class TronsmitActivity extends Activity {
     private static final int REQUEST_CODE_TAKE_PICTURE = 3;
     public static final String LOG_PREFIX = "TronsmitActivity";
 
-    private PictureViewFragment pictureFragment;
+    private PictureFragment pictureFragment;
     private ButtonsFragment buttonsFragment;
 
     /**
@@ -34,9 +34,8 @@ public class TronsmitActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        pictureFragment = (PictureViewFragment) getFragmentManager().findFragmentById(R.id.pictureFragment);
+        pictureFragment = (PictureFragment) getFragmentManager().findFragmentById(R.id.pictureFragment);
         buttonsFragment = (ButtonsFragment) getFragmentManager().findFragmentById(R.id.buttonsFragment);
-
     }
 
 

@@ -16,18 +16,10 @@ import android.widget.Toast;
 public class PictureManager implements PictureKnowerAbouter {
 
     private static final String LOG_PREFIX = "JessiTRON";
-    public static final String[] SELECTED_COLUMNS = new String[]{MediaStore.Images.ImageColumns._ID,    // 0
-            MediaStore.Images.ImageColumns.DATA,                              // 1
-            MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,               // 2
-            DATE_TAKEN,                                                       // 3
-            MediaStore.Images.ImageColumns.MIME_TYPE,           // 4
-            DATE_ADDED                                                        // 5
-    };
-    public static final int COL_IMAGE_TYPE = 4;
-    public static final int COL_IMAGE_URI = 1;
-    public static final int COL_IMAGE_ID = 0;
+
+
     private Cursor cursor;
-    private ImageView imageView;
+    private final ImageView imageView;
     private final Context context;
     private Uri imageUri;
     private String imageType;
@@ -43,6 +35,53 @@ public class PictureManager implements PictureKnowerAbouter {
         updateImageToCurrentPicture();
     }
 
+    private static final String[] SELECTED_COLUMNS = new String[]{
+            MediaStore.Images.ImageColumns._ID,                               // 0
+            MediaStore.Images.ImageColumns.DATA,                              // 1
+            MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,               // 2
+            DATE_TAKEN,                                                       // 3
+            MediaStore.Images.ImageColumns.MIME_TYPE,                         // 4
+            DATE_ADDED                                                        // 5
+    };
+
+    private void queryPictures() {
+        closeCursor();
+        cursor = context.getContentResolver()
+                .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        SELECTED_COLUMNS, null, null, DATE_ADDED + " DESC");
+
+        // TODO: check whether the disk is available.
+        if (cursor == null) {
+            Toast.makeText(context, "Unable to read photographs", Toast.LENGTH_LONG).show();
+            return;
+        }
+        cursor.moveToFirst();
+        pullInfoFromCursor();
+    }
+
+    private static final int COL_IMAGE_TYPE = 4;
+    private static final int COL_IMAGE_URI = 1;
+    private static final int COL_IMAGE_ID = 0;
+
+    private void pullInfoFromCursor() {
+        if (!cursor.isAfterLast()) {
+            imageUri = Uri.parse("file://" + cursor.getString(COL_IMAGE_URI));
+            imageType = cursor.getString(COL_IMAGE_TYPE);
+            imageId = cursor.getLong(COL_IMAGE_ID);
+        }
+    }
+
+    public void delete() {
+        context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                MediaStore.MediaColumns._ID + " = :id", new String[]{"" + imageId});
+        reset();
+    }
+
+    public void shutDown() {
+        closeCursor();
+        recycleBitmap();
+    }
+
     public boolean hasPicture() {
         return cursor != null && !cursor.isAfterLast();
     }
@@ -56,6 +95,14 @@ public class PictureManager implements PictureKnowerAbouter {
         }
     }
 
+    private void putPicInView() {
+        // Let's try to completely delete the old one, in the hopes that bitmap space will run out less frequently.
+        recycleBitmap();
+        imageView.setImageBitmap(null);
+        imageView.setImageURI(imageUri);
+        imageView.invalidate();
+    }
+
     private void clearView() {
         imageView.setImageDrawable(null);
     }
@@ -66,15 +113,6 @@ public class PictureManager implements PictureKnowerAbouter {
 
     public Uri getImageLocation() {
         return imageUri;
-    }
-
-
-    private void putPicInView() {
-        // Let's try to completely delete the old one, in the hopes that bitmap space will run out less frequently.
-        recycleBitmap();
-        imageView.setImageBitmap(null);
-        imageView.setImageURI(imageUri);
-        imageView.invalidate();
     }
 
     private void recycleBitmap() {
@@ -103,37 +141,12 @@ public class PictureManager implements PictureKnowerAbouter {
         }
     }
 
-    private void queryPictures() {
-        closeCursor();
-        cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, SELECTED_COLUMNS, null, null, DATE_ADDED + " DESC");
-        // TODO: check whether the disk is available.
-        if (cursor == null) {
-            Toast.makeText(context, "Unable to read photographs", Toast.LENGTH_LONG).show();
-            return;
-        }
-        cursor.moveToFirst();
-        pullInfoFromCursor();
-    }
-
-    private void pullInfoFromCursor() {
-        if (!cursor.isAfterLast()) {
-            imageUri = Uri.parse("file://" + cursor.getString(COL_IMAGE_URI));
-            imageType = cursor.getString(COL_IMAGE_TYPE);
-            imageId = cursor.getLong(COL_IMAGE_ID);
-        }
-    }
-
     private void closeCursor() {
         if (cursor != null && !cursor.isClosed()) {
             cursor.close();
         }
     }
 
-    public void shutDown() {
-        closeCursor();
-        recycleBitmap();
-        imageView = null;
-    }
 
     public void useThisOne(Uri data) {
         imageUri = data;
@@ -141,8 +154,5 @@ public class PictureManager implements PictureKnowerAbouter {
         putPicInView();
     }
 
-    public void delete() {
-        context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.MediaColumns._ID + " = :id", new String[] { "" + imageId});
-        reset();
-    }
+
 }

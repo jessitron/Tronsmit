@@ -13,9 +13,9 @@
 
 
     <fragment android:id="@+id/pictureFragment"
-              android:name="com.jessitron.tronsmit.PictureViewFragment"
+              android:name="com.jessitron.tronsmit.PictureFragment"
               android:layout_height="fill_parent"
-            android:layout_width="fill_parent"/>
+              android:layout_width="fill_parent"/>
 
 
 </LinearLayout>
