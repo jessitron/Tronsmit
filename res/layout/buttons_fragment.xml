@@ -4,11 +4,11 @@
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
+              android:background="#999999"
         >
     <LinearLayout android:orientation="horizontal"
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
-                  android:background="#000000"
                   android:paddingBottom="0dp"
                   android:paddingTop="4dp"
             >
@@ -16,30 +16,33 @@
                       android:orientation="vertical"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:background="#000000"
+
                       android:paddingLeft="4dp"
                       android:paddingRight="4dp"
                 >
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+
+                    android:textColor="#000000"
                     android:text="@string/contactnamedesc"
                     />
             <TextView
                     android:id="@+id/contactName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="#000000"
                     android:text="Nobody"/>
         </LinearLayout>
         <Button
                 android:id="@+id/pickContact"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:onClick="buttonsFragment_pickContact"
                 android:text="Pick Contact"/>
         <Button
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:onClick="buttonsFragment_chooseAction"
                 android:text="@string/chooseAction"/>
 

@@ -14,7 +14,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
-public class Button {
+public class CustomButton {
 
     private static final String TABLE_NAME = "BUTTON";
     public static final String ID = "_id";
@@ -68,7 +68,8 @@ public class Button {
                 while (!cursor.isAfterLast()) {
                     ComponentName component = new ComponentName(cursor.getString(1), cursor.getString(2));
                     Destination destination = new Destination(app.getContentResolver(), Uri.parse(cursor.getString(3)));
-                    result.add(new ButtonConfig(component, destination));
+                    Long id = cursor.getLong(0);
+                    result.add(new ButtonConfig(component, destination, id));
                     cursor.moveToNext();
                 }
             }
@@ -83,8 +84,10 @@ public class Button {
     public static class ButtonConfig {
         public final ComponentName component;
         public final Destination destination;
+        public final long id;
 
-        public ButtonConfig(ComponentName component, Destination destination) {
+        public ButtonConfig(ComponentName component, Destination destination, long id) {
+            this.id = id;
             this.component = component;
             this.destination = destination;
         }

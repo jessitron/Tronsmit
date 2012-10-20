@@ -6,6 +6,7 @@ Stories:
 *) takePicture doesn't work on my phone
 *) put something in an async task. Loading contact info maybe?
 *) bring copy-files-to-external-storage over from TelephoneGame
+*) icons for contacts and choose action
 
 ) disable "Choose an action" if contact is not chosen (or make it work w/no destination)
 

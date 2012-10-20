@@ -34,8 +34,10 @@ public class TronsmitActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        pictureFragment = (PictureFragment) getFragmentManager().findFragmentById(R.id.pictureFragment);
-        buttonsFragment = (ButtonsFragment) getFragmentManager().findFragmentById(R.id.buttonsFragment);
+        pictureFragment = (PictureFragment)
+                getFragmentManager().findFragmentById(R.id.pictureFragment);
+        buttonsFragment = (ButtonsFragment)
+                getFragmentManager().findFragmentById(R.id.buttonsFragment);
     }
 
 

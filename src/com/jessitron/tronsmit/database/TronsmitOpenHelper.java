@@ -15,7 +15,7 @@ public class TronsmitOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        Button.onCreate(sqLiteDatabase);
+        CustomButton.onCreate(sqLiteDatabase);
     }
 
     @Override

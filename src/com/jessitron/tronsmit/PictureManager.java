@@ -117,6 +117,7 @@ public class PictureManager implements PictureKnowerAbouter {
 
     private void recycleBitmap() {
         final Drawable drawable = imageView.getDrawable();
+        imageView.setImageDrawable(null);
         if (drawable != null && drawable instanceof BitmapDrawable) {
             ((BitmapDrawable) drawable).getBitmap().recycle();
         }
